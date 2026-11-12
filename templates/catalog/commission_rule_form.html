@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Regra de Comissão — SPS{% endblock %}
+
+{% block content %}
+<section>
+    <h2>{% if object %}Editar Regra de Comissão{% else %}Nova Regra de Comissão Específica{% endif %}</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Salvar Regra</button>
+        <a href="{% url 'catalog:commission_rule_list' %}">Cancelar</a>
+    </form>
+</section>
+{% endblock %}

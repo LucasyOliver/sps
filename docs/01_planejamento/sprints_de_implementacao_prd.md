@@ -50,16 +50,16 @@ modulo_pai: "prd_do_projeto.md"
 
 ## Sprint 03: Catálogo de Serviços, Regras de Comissão e Cadastro de Clientes
 
-- **Solicitação do usuário:** `pendente`
+- **Solicitação do usuário:** `solicitada e concluída em 2026-11-12`
 - **Requisitos atendidos:** `RF-003`, `RF-004`, `RNF-001`
 - **Pré-condições:** `Sprint 02` concluída.
 - **Tarefas da Sprint:**
-  - [ ] `S03-T01`: Criar app `catalog` com `ServiceCategory`, `Service` (duração em minutos, preço base, comissão padrão `%`, profissionais habilitados e códigos fiscais opcionais LC 116, CNAE e ISS) e `ProfessionalServiceCommission` (comissão específica por profissional e serviço).
-  - [ ] `S03-T02`: Implementar função de domínio `resolve_commission_percentage(salon, professional, service)` que retorna o percentual específico do profissional ou, na ausência, o percentual padrão do serviço.
-  - [ ] `S03-T03`: Criar app `clients` com model `Client` isolado por salão (dados de contato, observações/alergias e dados fiscais opcionais de tomador: CPF/CNPJ e endereço completo com CEP/IBGE) e validação de unicidade dentro do salão.
-  - [ ] `S03-T04`: Implementar CBVs de listagem, busca, criação e edição de Serviços, Regras de Comissão e Clientes (com aba de histórico de atendimentos).
-  - [ ] `S03-T05`: Escrever e executar testes automatizados (`DEC-001`) de isolamento cross-tenant de clientes/serviços e de resolução de precedência de comissão (`ProfessionalServiceCommission` vs `Service.default_commission_pct`).
-  - [ ] `S03-T06`: Revisar incremento, registrar `evidencias_da_sprint_003.md` e entregar para ação de Git/GitHub do usuário.
+  - [x] `S03-T01`: Criar app `catalog` com `ServiceCategory`, `Service` (duração em minutos, preço base, comissão padrão `%`, profissionais habilitados e códigos fiscais opcionais LC 116, CNAE e ISS) e `ProfessionalServiceCommission` (comissão específica por profissional e serviço).
+  - [x] `S03-T02`: Implementar função de domínio `resolve_commission_percentage(salon, professional, service)` que retorna o percentual específico do profissional ou, na ausência, o percentual padrão do serviço.
+  - [x] `S03-T03`: Criar app `clients` com model `Client` isolado por salão (dados de contato, observações/alergias e dados fiscais opcionais de tomador: CPF/CNPJ e endereço completo com CEP/IBGE) e validação de unicidade dentro do salão.
+  - [x] `S03-T04`: Implementar CBVs de listagem, busca, criação e edição de Serviços, Regras de Comissão e Clientes (com aba de histórico de atendimentos).
+  - [x] `S03-T05`: Escrever e executar testes automatizados (`DEC-001`) de isolamento cross-tenant de clientes/serviços e de resolução de precedência de comissão (`ProfessionalServiceCommission` vs `Service.default_commission_pct`).
+  - [x] `S03-T06`: Revisar incremento, registrar `evidencias_da_sprint_003.md` e entregar para ação de Git/GitHub do usuário.
 
 ---
 

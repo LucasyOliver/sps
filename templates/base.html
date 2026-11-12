@@ -12,6 +12,11 @@
             <nav>
                 <a href="{% url 'base:home' %}">Início</a>
                 {% if user.salon %}
+                    | <a href="{% url 'catalog:service_list' %}">Serviços</a>
+                    | <a href="{% url 'catalog:commission_rule_list' %}">Comissões</a>
+                    {% if user.role == 'gestor' or user.role == 'recepcionista' %}
+                        | <a href="{% url 'clients:client_list' %}">Clientes</a>
+                    {% endif %}
                     | <a href="{% url 'salons:business_hours' %}">Expediente do Salão</a>
                     | <a href="{% url 'salons:holidays' %}">Feriados</a>
                     | <a href="{% url 'scheduling:professional_schedules' %}">Expediente Profissionais</a>

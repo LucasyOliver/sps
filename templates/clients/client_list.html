@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Carteira de Clientes — SPS{% endblock %}
+
+{% block content %}
+<section>
+    <h2>Carteira de Clientes — {{ request.salon.trade_name }}</h2>
+    <p>
+        <a href="{% url 'clients:client_create' %}">+ Novo Cliente</a>
+    </p>
+
+    <form method="get">
+        <label for="q">Buscar cliente:</label>
+        <input type="text" id="q" name="q" value="{{ search_query }}" placeholder="Nome, telefone, e-mail ou CPF/CNPJ">
+        <button type="submit">Buscar</button>
+    </form>
+
+    <table border="1" cellpadding="6" cellspacing="0">
+        <thead>
+            <tr>
+                <th>Nome Completo</th>
+                <th>Telefone / WhatsApp</th>
+                <th>E-mail</th>
+                <th>CPF / CNPJ</th>
+                <th>Município / UF</th>
+                <th>Status</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for client in clients %}
+                <tr>
+                    <td><a href="{% url 'clients:client_detail' client.pk %}">{{ client.full_name }}</a></td>
+                    <td>{{ client.phone }}</td>
+                    <td>{{ client.email|default:"—" }}</td>
+                    <td>{{ client.cpf_cnpj|default:"—" }}</td>
+                    <td>{{ client.address_city|default:"—" }} / {{ client.address_state|default:"—" }}</td>
+                    <td>{% if client.is_active %}Ativo{% else %}Inativo{% endif %}</td>
+                    <td>
+                        <a href="{% url 'clients:client_detail' client.pk %}">Ficha e Histórico</a> |
+                        <a href="{% url 'clients:client_edit' client.pk %}">Editar</a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="7">Nenhum cliente encontrado neste salão.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endblock %}

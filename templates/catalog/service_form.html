@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Formulário de Serviço — SPS{% endblock %}
+
+{% block content %}
+<section>
+    <h2>{% if object %}Editar Serviço: {{ object.name }}{% else %}Novo Serviço{% endif %}</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Salvar Serviço</button>
+        <a href="{% url 'catalog:service_list' %}">Cancelar</a>
+    </form>
+</section>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Categoria de Serviço — SPS{% endblock %}
+
+{% block content %}
+<section>
+    <h2>{% if object %}Editar Categoria{% else %}Nova Categoria de Serviço{% endif %}</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Salvar Categoria</button>
+        <a href="{% url 'catalog:category_list' %}">Cancelar</a>
+    </form>
+</section>
+{% endblock %}

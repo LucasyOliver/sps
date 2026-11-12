@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'salons.apps.SalonsConfig',
     'accounts.apps.AccountsConfig',
     'scheduling.apps.SchedulingConfig',
+    'catalog.apps.CatalogConfig',
+    'clients.apps.ClientsConfig',
 ]
 
 MIDDLEWARE = [

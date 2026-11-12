@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Cadastro de Cliente — SPS{% endblock %}
+
+{% block content %}
+<section>
+    <h2>{% if object %}Editar Cliente: {{ object.full_name }}{% else %}Novo Cliente{% endif %}</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Salvar Cliente</button>
+        <a href="{% url 'clients:client_list' %}">Cancelar</a>
+    </form>
+</section>
+{% endblock %}

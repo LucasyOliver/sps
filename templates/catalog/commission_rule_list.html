@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Regras de Comissão — SPS{% endblock %}
+
+{% block content %}
+<section>
+    <h2>Regras de Comissão por Profissional e Serviço — {{ request.salon.trade_name }}</h2>
+    <p>
+        <a href="{% url 'catalog:service_list' %}">Voltar para Serviços</a>
+        {% if user.role == 'gestor' %}
+            | <a href="{% url 'catalog:commission_rule_create' %}">+ Nova Regra de Comissão</a>
+        {% endif %}
+    </p>
+    <table border="1" cellpadding="6" cellspacing="0">
+        <thead>
+            <tr>
+                <th>Profissional</th>
+                <th>Serviço</th>
+                <th>Comissão Padrão do Serviço (%)</th>
+                <th>Comissão Específica (%)</th>
+                <th>Status</th>
+                {% if user.role == 'gestor' %}
+                    <th>Ações</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for rule in commission_rules %}
+                <tr>
+                    <td>{{ rule.professional.full_name }}</td>
+                    <td>{{ rule.service.name }}</td>
+                    <td>{{ rule.service.default_commission_pct }}%</td>
+                    <td><strong>{{ rule.commission_pct }}%</strong></td>
+                    <td>{% if rule.is_active %}Ativa{% else %}Inativa{% endif %}</td>
+                    {% if user.role == 'gestor' %}
+                        <td>
+                            <a href="{% url 'catalog:commission_rule_edit' rule.pk %}">Editar</a> |
+                            <a href="{% url 'catalog:commission_rule_delete' rule.pk %}">Excluir</a>
+                        </td>
+                    {% endif %}
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="6">Nenhuma regra de comissão específica cadastrada.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endblock %}

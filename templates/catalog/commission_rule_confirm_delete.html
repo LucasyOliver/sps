@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Excluir Regra de Comissão — SPS{% endblock %}
+
+{% block content %}
+<section>
+    <h2>Confirmar Exclusão de Regra de Comissão</h2>
+    <p>Deseja realmente remover a comissão específica de <strong>{{ object.commission_pct }}%</strong> para <strong>{{ object.professional.full_name }}</strong> no serviço <strong>{{ object.service.name }}</strong>?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">Confirmar Exclusão</button>
+        <a href="{% url 'catalog:commission_rule_list' %}">Cancelar</a>
+    </form>
+</section>
+{% endblock %}

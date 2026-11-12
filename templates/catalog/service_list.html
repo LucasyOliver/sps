@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Catálogo de Serviços — SPS{% endblock %}
+
+{% block content %}
+<section>
+    <h2>Catálogo de Serviços — {{ request.salon.trade_name }}</h2>
+    <p>
+        <a href="{% url 'catalog:category_list' %}">Categorias</a> |
+        <a href="{% url 'catalog:commission_rule_list' %}">Regras de Comissão</a>
+        {% if user.role == 'gestor' %}
+            | <a href="{% url 'catalog:service_create' %}">+ Novo Serviço</a>
+        {% endif %}
+    </p>
+
+    <form method="get">
+        <label for="q">Buscar serviço:</label>
+        <input type="text" id="q" name="q" value="{{ search_query }}" placeholder="Nome, descrição ou categoria">
+        <label for="category">Categoria:</label>
+        <select id="category" name="category">
+            <option value="">Todas</option>
+            {% for cat in categories %}
+                <option value="{{ cat.pk }}" {% if selected_category == cat.pk|stringformat:"s" %}selected{% endif %}>
+                    {{ cat.name }}
+                </option>
+            {% endfor %}
+        </select>
+        <button type="submit">Filtrar</button>
+    </form>
+
+    <table border="1" cellpadding="6" cellspacing="0">
+        <thead>
+            <tr>
+                <th>Serviço</th>
+                <th>Categoria</th>
+                <th>Duração (min)</th>
+                <th>Preço Base (R$)</th>
+                <th>Comissão Padrão (%)</th>
+                <th>LC 116 / CNAE</th>
+                <th>Profissionais Habilitados</th>
+                <th>Status</th>
+                {% if user.role == 'gestor' %}
+                    <th>Ações</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for service in services %}
+                <tr>
+                    <td>{{ service.name }}</td>
+                    <td>{{ service.category.name|default:"—" }}</td>
+                    <td>{{ service.duration_minutes }} min</td>
+                    <td>R$ {{ service.base_price }}</td>
+                    <td>{{ service.default_commission_pct }}%</td>
+                    <td>{{ service.lc116_service_code|default:"—" }} / {{ service.cnae_code|default:"—" }}</td>
+                    <td>
+                        {% for prof in service.professionals.all %}
+                            {{ prof.full_name }}{% if not forloop.last %}, {% endif %}
+                        {% empty %}
+                            —
+                        {% endfor %}
+                    </td>
+                    <td>{% if service.is_active %}Ativo{% else %}Inativo{% endif %}</td>
+                    {% if user.role == 'gestor' %}
+                        <td>
+                            <a href="{% url 'catalog:service_edit' service.pk %}">Editar</a>
+                        </td>
+                    {% endif %}
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="9">Nenhum serviço encontrado neste salão.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endblock %}

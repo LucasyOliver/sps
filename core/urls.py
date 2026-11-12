@@ -10,5 +10,7 @@ urlpatterns = [
     path('conta/', include('accounts.urls', namespace='accounts')),
     path('salao/', include('salons.urls', namespace='salons')),
     path('agenda/', include('scheduling.urls', namespace='scheduling')),
+    path('catalogo/', include('catalog.urls', namespace='catalog')),
+    path('clientes/', include('clients.urls', namespace='clients')),
     path('', include('base.urls', namespace='base')),
 ]

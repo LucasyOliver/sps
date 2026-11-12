@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Ficha do Cliente — {{ client.full_name }} — SPS{% endblock %}
+
+{% block content %}
+<section>
+    <h2>Ficha do Cliente: {{ client.full_name }}</h2>
+    <p>
+        <a href="{% url 'clients:client_list' %}">Voltar para Clientes</a> |
+        <a href="{% url 'clients:client_edit' client.pk %}">Editar Cadastro</a>
+    </p>
+
+    <h3>Dados Cadastrais e Observações Técnicas</h3>
+    <ul>
+        <li><strong>Telefone / WhatsApp:</strong> {{ client.phone }}</li>
+        <li><strong>E-mail:</strong> {{ client.email|default:"—" }}</li>
+        <li><strong>Data de Nascimento:</strong> {{ client.birth_date|default:"—" }}</li>
+        <li><strong>Observações Técnicas / Alergias:</strong> {{ client.notes|default:"Nenhuma observação registrada." }}</li>
+    </ul>
+
+    <h3>Dados Fiscais de Tomador (Preparação NFS-e / NFC-e)</h3>
+    <ul>
+        <li><strong>CPF / CNPJ:</strong> {{ client.cpf_cnpj|default:"Não informado" }}</li>
+        <li><strong>Endereço:</strong> {{ client.address_street|default:"—" }}, {{ client.address_number|default:"S/N" }} {{ client.address_complement }}</li>
+        <li><strong>Bairro / Município / UF:</strong> {{ client.address_neighborhood|default:"—" }} — {{ client.address_city|default:"—" }} / {{ client.address_state|default:"—" }}</li>
+        <li><strong>CEP / Código IBGE:</strong> {{ client.address_zip_code|default:"—" }} / {{ client.ibge_city_code|default:"—" }}</li>
+    </ul>
+
+    <h3>Aba de Histórico de Atendimentos e Comandas</h3>
+    <h4>Agendamentos</h4>
+    <ul>
+        {% for appointment in appointment_history %}
+            <li>{{ appointment }}</li>
+        {% empty %}
+            <li>Nenhum agendamento registrado para este cliente até o momento.</li>
+        {% endfor %}
+    </ul>
+
+    <h4>Comandas e Valores Gastos</h4>
+    <ul>
+        {% for order in service_order_history %}
+            <li>{{ order }}</li>
+        {% empty %}
+            <li>Nenhuma comanda registrada para este cliente até o momento.</li>
+        {% endfor %}
+    </ul>
+</section>
+{% endblock %}
