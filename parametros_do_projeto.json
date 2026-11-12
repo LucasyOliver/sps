@@ -1,0 +1,51 @@
+{
+  "_instrucoes": "Parametros editaveis do projeto SPS (Sistema Para Saloes). null significa a_definir. Nao preencher com segredos. Campos textuais longos referenciam arquivos em docs/01_planejamento/.",
+  "_versao_template": "1.0.0",
+  "valores": {
+    "ambiente_deploy": "VPS Ubuntu com Docker Swarm, Traefik (TLS DNS-01 Cloudflare) e Docker Secrets",
+    "arquivo_catalogo_design": null,
+    "arquivo_design_system": null,
+    "contexto_do_projeto": "Plataforma SaaS multi-tenant para gestao integrada de saloes de beleza (SPS - Sistema Para Saloes), contemplando agendamento interno e publico, catalogo de servicos, comandas, caixa, comissoes de profissionais, controle de estoque, preparacao estrutural para futura emissao de notas fiscais (NFS-e/NFC-e), relatorios PDF e assistente gerencial interno de IA.",
+    "dominio_principal": null,
+    "endereco_swarm": null,
+    "especificacoes_tecnicas_confirmadas": "Ver docs/01_planejamento/prompt_refinado_do_projeto.md (secao <tech_specs>)",
+    "id_sprint": "Sprint 01",
+    "modelo_llm": null,
+    "modelo_tenant": "Multi-tenant compartilhado com isolamento por organizacao (Salao). Cada usuario interno pertence a um unico salao fixo (alem do Superadmin SaaS global); clientes, servicos, agenda, comandas, caixa, comissoes e estoque sao estritamente isolados por salao.",
+    "nome_organizacao": "salao",
+    "nome_projeto": "SPS (Sistema Para Salões)",
+    "nome_stack": "sps",
+    "problema_do_negocio": "Centralizar e profissionalizar a operacao de saloes de beleza independentes em uma plataforma SaaS segura, eliminando conflitos de agenda, erros no calculo de comissoes no fechamento de comandas, descontrole de estoque de produtos/insumos e falta de visibilidade gerencial e fiscal.",
+    "registry_imagem": null,
+    "requisitos_funcionais": "Ver docs/01_planejamento/requisitos_do_projeto.md (RF-001 a RF-013)",
+    "requisitos_nao_funcionais": "Ver docs/01_planejamento/requisitos_do_projeto.md (RNF-001 a RNF-006)",
+    "restricoes_do_projeto": "Sem codigo de negocio antes da aprovacao explicita do PRD; execucao de uma sprint por vez mediante solicitacao explicita; Git e GitHub sob controle 100% exclusivo do desenvolvedor; emissao efetiva de notas fiscais (integracao externa SEFAZ/Prefeitura) fora do MVP, mantendo dados e contratos preparados.",
+    "slug_projeto": "sps",
+    "tag_release": null,
+    "texto_prompt_bruto": "Ver docs/01_planejamento/prompt_inicial_do_projeto.md",
+    "texto_prompt_refinado": "Ver docs/01_planejamento/prompt_refinado_do_projeto.md",
+    "versao_django": "5.2 LTS",
+    "versao_prd": "1.0.0",
+    "versao_python": "3.13.6"
+  },
+  "decisoes": {
+    "modo_stack": "replicar_baseline",
+    "ia_no_produto": true,
+    "politica_testes": "testes_automatizados_para_fluxos_criticos_mais_verificacao_manual_DEC_001",
+    "estrategia_migrations": "job_serializado_antes_do_rollout_do_app",
+    "estrategia_staticfiles": "collectstatic_no_build_da_imagem_com_whitenoise",
+    "responsavel_deploy": "desenvolvedor",
+    "rpo": "24h (backup diario automatizado)",
+    "rto": "2h (restauracao documentada em VPS unica)"
+  },
+  "controle": {
+    "stack_confirmada": true,
+    "modo_refinamento": "assistido",
+    "prompt_refinado_revisado": true,
+    "prd_aprovado": true,
+    "evidencia_aprovacao_prd": "Aprovado pelo desenvolvedor em 2026-11-12: 'Aprovo o PRD versao 1.0.0 do SPS e solicito a execucao exclusiva da Sprint 01.'",
+    "sprint_solicitada": "Sprint 01",
+    "git_github_exclusivos_do_usuario": true,
+    "deploy_executado": false
+  }
+}

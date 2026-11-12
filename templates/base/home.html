@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}Painel Inicial — SPS{% endblock %}
+
+{% block content %}
+<section>
+    <h2>Painel Operacional</h2>
+    <p>Bem-vindo ao <strong>SPS (Sistema Para Salões)</strong>.</p>
+    <ul>
+        <li><strong>Usuário autenticado:</strong> {{ user.email }}</li>
+        <li><strong>Perfil:</strong> {{ user.get_role_display }}</li>
+        {% if user.salon %}
+            <li><strong>Salão vinculado:</strong> {{ user.salon.trade_name }} ({{ user.salon.slug }})</li>
+            <li><strong>Regime tributário configurado:</strong> {{ user.salon.get_tax_regime_display }}</li>
+        {% else %}
+            <li><strong>Escopo:</strong> Administração Global da Plataforma SaaS</li>
+        {% endif %}
+    </ul>
+</section>
+{% endblock %}

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SPS — Sistema Para Salões{% endblock %}</title>
+</head>
+<body>
+    <header>
+        <h1>SPS — Sistema Para Salões</h1>
+        {% if user.is_authenticated %}
+            <nav>
+                <span>Olá, {{ user.full_name }} ({{ user.get_role_display }})</span>
+                {% if user.salon %}
+                    <span>| Salão: <strong>{{ user.salon.trade_name }}</strong></span>
+                {% endif %}
+                <form action="{% url 'accounts:logout' %}" method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit">Sair</button>
+                </form>
+            </nav>
+        {% endif %}
+    </header>
+    <main>
+        {% if messages %}
+            <ul>
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

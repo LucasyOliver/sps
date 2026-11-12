@@ -1,0 +1,56 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: sps_postgres_dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: sps_dev
+      POSTGRES_USER: sps_user
+      POSTGRES_PASSWORD: sps_dev_password
+    ports:
+      - '127.0.0.1:5432:5432'
+    volumes:
+      - sps_postgres_dev_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U sps_user -d sps_dev']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: sps_rabbitmq_dev
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: sps_mq
+      RABBITMQ_DEFAULT_PASS: sps_mq_dev_password
+    ports:
+      - '127.0.0.1:5672:5672'
+      - '127.0.0.1:15672:15672'
+    volumes:
+      - sps_rabbitmq_dev_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ['CMD', 'rabbitmq-diagnostics', '-q', 'ping']
+      interval: 15s
+      timeout: 10s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: sps_redis_dev
+    restart: unless-stopped
+    command: ['redis-server', '--appendonly', 'yes']
+    ports:
+      - '127.0.0.1:6379:6379'
+    volumes:
+      - sps_redis_dev_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  sps_postgres_dev_data:
+  sps_rabbitmq_dev_data:
+  sps_redis_dev_data:
