@@ -1,7 +1,7 @@
 import re
 from django.core.exceptions import ValidationError
 from django.db import models
-from base.models import TimeStampedModel
+from base.models import TenantScopedModel, TimeStampedModel
 
 
 class TaxRegimeChoices(models.TextChoices):
@@ -10,6 +10,16 @@ class TaxRegimeChoices(models.TextChoices):
     SIMPLES_NACIONAL = 'simples_nacional', 'Simples Nacional'
     LUCRO_PRESUMIDO = 'lucro_presumido', 'Lucro Presumido'
     LUCRO_REAL = 'lucro_real', 'Lucro Real'
+
+
+class WeekdayChoices(models.IntegerChoices):
+    MONDAY = 0, 'Segunda-feira'
+    TUESDAY = 1, 'Terça-feira'
+    WEDNESDAY = 2, 'Quarta-feira'
+    THURSDAY = 3, 'Quinta-feira'
+    FRIDAY = 4, 'Sexta-feira'
+    SATURDAY = 5, 'Sábado'
+    SUNDAY = 6, 'Domingo'
 
 
 def normalize_digits(value):
@@ -91,17 +101,97 @@ class Salon(TimeStampedModel):
 
     def clean(self):
         super().clean()
+        errors = {}
         if self.cnpj:
             digits = normalize_digits(self.cnpj)
             if len(digits) != 14:
-                raise ValidationError(
-                    {'cnpj': 'O CNPJ informado deve conter exatamente 14 dígitos numéricos.'}
-                )
-            self.cnpj = digits
+                errors['cnpj'] = 'O CNPJ informado deve conter exatamente 14 dígitos numéricos.'
+            else:
+                self.cnpj = digits
         if self.ibge_city_code:
             ibge_digits = normalize_digits(self.ibge_city_code)
             if len(ibge_digits) != 7:
+                errors['ibge_city_code'] = 'O código IBGE do município deve conter 7 dígitos.'
+            else:
+                self.ibge_city_code = ibge_digits
+        if errors:
+            raise ValidationError(errors)
+
+
+class SalonBusinessHours(TenantScopedModel):
+    weekday = models.PositiveSmallIntegerField(
+        'Dia da semana',
+        choices=WeekdayChoices.choices,
+    )
+    is_open = models.BooleanField('Aberto neste dia', default=True)
+    opening_time = models.TimeField('Horário de abertura', null=True, blank=True)
+    closing_time = models.TimeField('Horário de fechamento', null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'Horário de funcionamento do salão'
+        verbose_name_plural = 'Horários de funcionamento do salão'
+        ordering = ['weekday']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['salon', 'weekday'],
+                name='unique_salon_business_hours_weekday',
+            )
+        ]
+
+    def __str__(self):
+        day_label = self.get_weekday_display()
+        if not self.is_open:
+            return f'{self.salon.trade_name} - {day_label}: Fechado'
+        return f'{self.salon.trade_name} - {day_label}: {self.opening_time} às {self.closing_time}'
+
+    def clean(self):
+        super().clean()
+        if self.is_open:
+            if not self.opening_time or not self.closing_time:
                 raise ValidationError(
-                    {'ibge_city_code': 'O código IBGE do município deve conter 7 dígitos.'}
+                    'Quando o salão está aberto no dia, os horários de abertura e fechamento são obrigatórios.'
                 )
-            self.ibge_city_code = ibge_digits
+            if self.opening_time >= self.closing_time:
+                raise ValidationError(
+                    {'closing_time': 'O horário de fechamento deve ser posterior ao horário de abertura.'}
+                )
+        else:
+            self.opening_time = None
+            self.closing_time = None
+
+
+class SalonHoliday(TenantScopedModel):
+    date = models.DateField('Data do feriado / fechamento')
+    description = models.CharField('Descrição', max_length=120)
+    is_closed_all_day = models.BooleanField('Fechado o dia todo', default=True)
+    opening_time = models.TimeField('Abertura especial', null=True, blank=True)
+    closing_time = models.TimeField('Fechamento especial', null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'Feriado ou fechamento do salão'
+        verbose_name_plural = 'Feriados e fechamentos do salão'
+        ordering = ['date']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['salon', 'date'],
+                name='unique_salon_holiday_date',
+            )
+        ]
+
+    def __str__(self):
+        return f'{self.salon.trade_name} - {self.date}: {self.description}'
+
+    def clean(self):
+        super().clean()
+        if not self.is_closed_all_day:
+            if not self.opening_time or not self.closing_time:
+                raise ValidationError(
+                    'Em feriados com expediente parcial, informe os horários de abertura e fechamento.'
+                )
+            if self.opening_time >= self.closing_time:
+                raise ValidationError(
+                    {'closing_time': 'O horário de fechamento especial deve ser posterior ao de abertura.'}
+                )
+        else:
+            self.opening_time = None
+            self.closing_time = None

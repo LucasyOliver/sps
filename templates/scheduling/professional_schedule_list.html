@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Expediente dos Profissionais — SPS{% endblock %}
+
+{% block content %}
+<section>
+    <h2>Expediente Individual dos Profissionais — {{ request.salon.trade_name }}</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Profissional</th>
+                <th>Dia da Semana</th>
+                <th>Atende?</th>
+                <th>Início</th>
+                <th>Fim</th>
+                <th>Intervalo</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for sched in schedules %}
+                <tr>
+                    <td>{{ sched.professional.full_name }}</td>
+                    <td>{{ sched.get_weekday_display }}</td>
+                    <td>{% if sched.is_working %}Sim{% else %}Não{% endif %}</td>
+                    <td>{{ sched.start_time|default:'-' }}</td>
+                    <td>{{ sched.end_time|default:'-' }}</td>
+                    <td>
+                        {% if sched.break_start_time %}
+                            {{ sched.break_start_time }} às {{ sched.break_end_time }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="6">Nenhum expediente individual cadastrado.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if user.role == 'gestor' %}
+        <h3>Definir Expediente do Profissional</h3>
+        <form action="{% url 'scheduling:professional_schedule_save' %}" method="post" novalidate>
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Salvar Expediente</button>
+        </form>
+    {% endif %}
+</section>
+{% endblock %}

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from salons.models import Salon
+from salons.models import Salon, SalonBusinessHours, SalonHoliday
 
 
 @admin.register(Salon)
@@ -66,3 +66,16 @@ class SalonAdmin(admin.ModelAdmin):
             {'fields': ('created_at', 'updated_at')},
         ),
     )
+
+
+@admin.register(SalonBusinessHours)
+class SalonBusinessHoursAdmin(admin.ModelAdmin):
+    list_display = ('salon', 'weekday', 'is_open', 'opening_time', 'closing_time')
+    list_filter = ('salon', 'weekday', 'is_open')
+
+
+@admin.register(SalonHoliday)
+class SalonHolidayAdmin(admin.ModelAdmin):
+    list_display = ('salon', 'date', 'description', 'is_closed_all_day', 'opening_time', 'closing_time')
+    list_filter = ('salon', 'is_closed_all_day')
+    search_fields = ('description',)

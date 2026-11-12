@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}Novo Bloqueio de Agenda — SPS{% endblock %}
+
+{% block content %}
+<section>
+    <h2>Registrar Bloqueio de Agenda</h2>
+    <form method="post" novalidate>
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Salvar Bloqueio</button>
+    </form>
+</section>
+{% endblock %}

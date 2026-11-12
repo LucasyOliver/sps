@@ -35,16 +35,16 @@ modulo_pai: "prd_do_projeto.md"
 
 ## Sprint 02: Configurações do Salão, Expediente, Equipe e Isolamento Multi-tenant
 
-- **Solicitação do usuário:** `pendente`
+- **Solicitação do usuário:** `solicitada e concluída em 2026-11-12`
 - **Requisitos atendidos:** `RF-001`, `RF-002`, `RNF-001`
 - **Pré-condições:** `Sprint 01` concluída.
 - **Tarefas da Sprint:**
-  - [ ] `S02-T01`: Implementar `SalonBusinessHours` (expediente do salão por dia da semana) e `SalonHoliday` (feriados/fechamentos) no app `salons`.
-  - [ ] `S02-T02`: Implementar `SalonTenantRequiredMixin` e mixins de autorização por perfil (`GestorRequiredMixin`, `RecepcaoOrGestorMixin`, `ProfissionalScopeMixin`) em `base`.
-  - [ ] `S02-T03`: Implementar CBVs para o `gestor` editar dados operacionais e fiscais do próprio salão e gerir membros da equipe (`gestor`, `recepcionista`, `profissional` com CPF/CNPJ opcional de parceiro).
-  - [ ] `S02-T04`: Implementar no app `scheduling` os modelos e telas de expediente individual do profissional (`ProfessionalSchedule`) e bloqueios de agenda (`ScheduleBlock` para férias/folgas/ausências).
-  - [ ] `S02-T05`: Escrever e executar testes automatizados (`DEC-001`) garantindo que usuários do Salão A recebem `403`/`404` ao tentar acessar/editar equipe ou configurações do Salão B e que `recepcionista`/`profissional` não alteram dados fiscais do salão.
-  - [ ] `S02-T06`: Revisar incremento, registrar `evidencias_da_sprint_002.md` e entregar para ação de Git/GitHub do usuário.
+  - [x] `S02-T01`: Implementar `SalonBusinessHours` (expediente do salão por dia da semana) e `SalonHoliday` (feriados/fechamentos) no app `salons`.
+  - [x] `S02-T02`: Implementar `SalonTenantRequiredMixin` e mixins de autorização por perfil (`GestorRequiredMixin`, `RecepcaoOrGestorMixin`, `ProfissionalScopeMixin`) em `base`.
+  - [x] `S02-T03`: Implementar CBVs para o `gestor` editar dados operacionais e fiscais do próprio salão e gerir membros da equipe (`gestor`, `recepcionista`, `profissional` com CPF/CNPJ opcional de parceiro).
+  - [x] `S02-T04`: Implementar no app `scheduling` os modelos e telas de expediente individual do profissional (`ProfessionalSchedule`) e bloqueios de agenda (`ScheduleBlock` para férias/folgas/ausências).
+  - [x] `S02-T05`: Escrever e executar testes automatizados (`DEC-001`) garantindo que usuários do Salão A recebem `403`/`404` ao tentar acessar/editar equipe ou configurações do Salão B e que `recepcionista`/`profissional` não alteram dados fiscais do salão.
+  - [x] `S02-T06`: Revisar incremento, registrar `evidencias_da_sprint_002.md` e entregar para ação de Git/GitHub do usuário.
 
 ---
 

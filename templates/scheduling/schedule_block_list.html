@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}Bloqueios de Agenda — SPS{% endblock %}
+
+{% block content %}
+<section>
+    <h2>Bloqueios de Agenda (Férias, Folgas e Ausências)</h2>
+    <p><a href="{% url 'scheduling:schedule_block_create' %}">Registrar Novo Bloqueio</a></p>
+    <table>
+        <thead>
+            <tr>
+                <th>Profissional</th>
+                <th>Tipo</th>
+                <th>Início</th>
+                <th>Fim</th>
+                <th>Motivo</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for block in blocks %}
+                <tr>
+                    <td>{{ block.professional.full_name }}</td>
+                    <td>{{ block.get_block_type_display }}</td>
+                    <td>{{ block.start_at }}</td>
+                    <td>{{ block.end_at }}</td>
+                    <td>{{ block.reason|default:'-' }}</td>
+                    <td><a href="{% url 'scheduling:schedule_block_delete' block.pk %}">Excluir</a></td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="6">Nenhum bloqueio de agenda registrado.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}Colaborador da Equipe — SPS{% endblock %}
+
+{% block content %}
+<section>
+    <h2>{% if object %}Editar Colaborador{% else %}Novo Colaborador da Equipe{% endif %}</h2>
+    <form method="post" novalidate>
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Salvar Colaborador</button>
+    </form>
+</section>
+{% endblock %}

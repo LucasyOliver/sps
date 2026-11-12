@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}Feriados e Fechamentos — SPS{% endblock %}
+
+{% block content %}
+<section>
+    <h2>Feriados e Fechamentos — {{ request.salon.trade_name }}</h2>
+    {% if user.role == 'gestor' %}
+        <p><a href="{% url 'salons:holiday_create' %}">Novo Feriado / Fechamento</a></p>
+    {% endif %}
+    <ul>
+        {% for holiday in holidays %}
+            <li>
+                <strong>{{ holiday.date }}</strong> — {{ holiday.description }}
+                ({% if holiday.is_closed_all_day %}Fechado o dia todo{% else %}{{ holiday.opening_time }} às {{ holiday.closing_time }}{% endif %})
+                {% if user.role == 'gestor' %}
+                    | <a href="{% url 'salons:holiday_delete' holiday.pk %}">Excluir</a>
+                {% endif %}
+            </li>
+        {% empty %}
+            <li>Nenhum feriado registrado.</li>
+        {% endfor %}
+    </ul>
+</section>
+{% endblock %}

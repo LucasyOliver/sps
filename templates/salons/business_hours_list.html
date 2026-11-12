@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Expediente do Salão — SPS{% endblock %}
+
+{% block content %}
+<section>
+    <h2>Horários de Funcionamento — {{ request.salon.trade_name }}</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Dia da Semana</th>
+                <th>Situação</th>
+                <th>Abertura</th>
+                <th>Fechamento</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in business_hours_list %}
+                <tr>
+                    <td>{{ item.get_weekday_display }}</td>
+                    <td>{% if item.is_open %}Aberto{% else %}Fechado{% endif %}</td>
+                    <td>{{ item.opening_time|default:'-' }}</td>
+                    <td>{{ item.closing_time|default:'-' }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="4">Nenhum horário de funcionamento cadastrado.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if user.role == 'gestor' %}
+        <h3>Configurar Dia da Semana</h3>
+        <form action="{% url 'salons:business_hours_save' %}" method="post" novalidate>
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Salvar Horário</button>
+        </form>
+    {% endif %}
+</section>
+{% endblock %}

@@ -8,5 +8,7 @@ admin.site.index_title = 'Gestão de Salões e Usuários'
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('conta/', include('accounts.urls', namespace='accounts')),
+    path('salao/', include('salons.urls', namespace='salons')),
+    path('agenda/', include('scheduling.urls', namespace='scheduling')),
     path('', include('base.urls', namespace='base')),
 ]

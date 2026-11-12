@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'base.apps.BaseConfig',
     'salons.apps.SalonsConfig',
     'accounts.apps.AccountsConfig',
+    'scheduling.apps.SchedulingConfig',
 ]
 
 MIDDLEWARE = [

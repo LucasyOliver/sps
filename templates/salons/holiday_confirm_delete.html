@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}Excluir Feriado — SPS{% endblock %}
+
+{% block content %}
+<section>
+    <h2>Confirmar Exclusão de Feriado</h2>
+    <p>Deseja excluir o registro <strong>{{ object.description }}</strong> ({{ object.date }})?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">Confirmar Exclusão</button>
+    </form>
+</section>
+{% endblock %}

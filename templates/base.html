@@ -10,7 +10,18 @@
         <h1>SPS — Sistema Para Salões</h1>
         {% if user.is_authenticated %}
             <nav>
-                <span>Olá, {{ user.full_name }} ({{ user.get_role_display }})</span>
+                <a href="{% url 'base:home' %}">Início</a>
+                {% if user.salon %}
+                    | <a href="{% url 'salons:business_hours' %}">Expediente do Salão</a>
+                    | <a href="{% url 'salons:holidays' %}">Feriados</a>
+                    | <a href="{% url 'scheduling:professional_schedules' %}">Expediente Profissionais</a>
+                    | <a href="{% url 'scheduling:schedule_blocks' %}">Bloqueios de Agenda</a>
+                    {% if user.role == 'gestor' %}
+                        | <a href="{% url 'salons:settings' %}">Configurações e Fiscal</a>
+                        | <a href="{% url 'accounts:team_list' %}">Equipe</a>
+                    {% endif %}
+                {% endif %}
+                | <span>Olá, {{ user.full_name }} ({{ user.get_role_display }})</span>
                 {% if user.salon %}
                     <span>| Salão: <strong>{{ user.salon.trade_name }}</strong></span>
                 {% endif %}

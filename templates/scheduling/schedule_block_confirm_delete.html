@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}Excluir Bloqueio de Agenda — SPS{% endblock %}
+
+{% block content %}
+<section>
+    <h2>Confirmar Exclusão de Bloqueio de Agenda</h2>
+    <p>Deseja excluir o bloqueio de <strong>{{ object.professional.full_name }}</strong> ({{ object.start_at }} até {{ object.end_at }})?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">Confirmar Exclusão</button>
+    </form>
+</section>
+{% endblock %}
