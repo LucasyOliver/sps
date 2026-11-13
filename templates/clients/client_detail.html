@@ -39,7 +39,9 @@
     <h4>Comandas e Valores Gastos</h4>
     <ul>
         {% for order in service_order_history %}
-            <li>{{ order }}</li>
+            <li>
+                <a href="{% url 'orders:order_detail' order.pk %}">{{ order }}</a> — Total: R$ {{ order.total_amount }}
+            </li>
         {% empty %}
             <li>Nenhuma comanda registrada para este cliente até o momento.</li>
         {% endfor %}

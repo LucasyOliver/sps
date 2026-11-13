@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Nova Movimentação de Estoque — SPS{% endblock %}
+
+{% block content %}
+<section>
+    <h2>Registrar Movimentação de Estoque</h2>
+    <p class="helptext" style="margin-bottom: 1rem;">
+        Entradas de compra somam ao saldo; consumo interno subtrai; ajustes de inventário aceitam valores positivos ou negativos
+        e exigem motivo. O saldo nunca pode ficar negativo. Saídas por venda ocorrem automaticamente no fechamento da comanda.
+    </p>
+    <form method="post" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+            <div class="sps-alert sps-alert-error" role="alert">{{ form.non_field_errors }}</div>
+        {% endif %}
+        {{ form.as_p }}
+        <div style="display: flex; gap: 0.5rem;">
+            <button type="submit" class="btn-primary">Registrar Movimentação</button>
+            <a href="{% url 'inventory:product_list' %}" class="btn-secondary">Voltar</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

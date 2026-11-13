@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Comandas — SPS{% endblock %}
+
+{% block content %}
+<section>
+    <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
+        <h2 style="margin: 0;">Comandas de Atendimento — {{ request.salon.trade_name }}</h2>
+        <a href="{% url 'orders:order_create' %}" class="btn-primary">+ Nova Comanda Avulsa</a>
+    </div>
+
+    <form method="get" style="display: flex; gap: 0.75rem; align-items: flex-end; margin: 1rem 0;">
+        <div style="min-width: 200px;">
+            <label for="status">Status</label>
+            <select id="status" name="status">
+                {% for value, label in status_choices %}
+                    <option value="{{ value }}" {% if selected_status == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn-secondary">Filtrar</button>
+    </form>
+
+    <div class="sps-table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Comanda</th>
+                    <th>Aberta em</th>
+                    <th>Cliente</th>
+                    <th>Origem</th>
+                    <th>Serviços</th>
+                    <th>Produtos</th>
+                    <th>Total Líquido</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                    <tr>
+                        <td><a href="{% url 'orders:order_detail' order.pk %}"><strong>#{{ order.pk }}</strong></a></td>
+                        <td>{{ order.created_at|date:'d/m/Y H:i' }}</td>
+                        <td>{{ order.client.full_name|default:"Venda avulsa" }}</td>
+                        <td>{% if order.appointment_id %}Agendamento #{{ order.appointment_id }}{% else %}Avulsa{% endif %}</td>
+                        <td>R$ {{ order.subtotal_services }}</td>
+                        <td>R$ {{ order.subtotal_products }}</td>
+                        <td><strong>R$ {{ order.total_amount }}</strong></td>
+                        <td>
+                            <span class="sps-badge {% if order.status == 'aberta' %}sps-badge-warning{% elif order.status == 'fechada_paga' %}sps-badge-success{% else %}sps-badge-danger{% endif %}">
+                                {{ order.get_status_display }}
+                            </span>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="8">Nenhuma comanda encontrada para o filtro selecionado.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

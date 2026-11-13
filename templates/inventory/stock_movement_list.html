@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Movimentações de Estoque — SPS{% endblock %}
+
+{% block content %}
+<section>
+    <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
+        <h2 style="margin: 0;">Livro de Movimentações de Estoque</h2>
+        <div style="display: flex; gap: 0.5rem;">
+            <a href="{% url 'inventory:product_list' %}" class="btn-secondary">Produtos</a>
+            {% if user.role == 'gestor' %}
+                <a href="{% url 'inventory:movement_create' %}" class="btn-primary">+ Nova Movimentação</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <form method="get" style="display: flex; gap: 0.75rem; align-items: flex-end; margin: 1rem 0; flex-wrap: wrap;">
+        <div style="min-width: 240px;">
+            <label for="product">Produto</label>
+            <select id="product" name="product">
+                <option value="">Todos</option>
+                {% for product in products %}
+                    <option value="{{ product.pk }}" {% if selected_product == product.pk|stringformat:"s" %}selected{% endif %}>{{ product.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn-secondary">Filtrar</button>
+    </form>
+
+    <div class="sps-table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Data/Hora</th>
+                    <th>Produto</th>
+                    <th>Tipo</th>
+                    <th>Variação</th>
+                    <th>Saldo Após</th>
+                    <th>Comanda</th>
+                    <th>Responsável</th>
+                    <th>Motivo</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for movement in movements %}
+                    <tr>
+                        <td>{{ movement.created_at|date:'d/m/Y H:i' }}</td>
+                        <td>{{ movement.product.name }}</td>
+                        <td>{{ movement.get_movement_type_display }}</td>
+                        <td>
+                            <span class="sps-badge {% if movement.quantity_delta > 0 %}sps-badge-success{% else %}sps-badge-danger{% endif %}">
+                                {% if movement.quantity_delta > 0 %}+{% endif %}{{ movement.quantity_delta }}
+                            </span>
+                        </td>
+                        <td>{{ movement.balance_after }}</td>
+                        <td>{% if movement.order_id %}<a href="{% url 'orders:order_detail' movement.order_id %}">#{{ movement.order_id }}</a>{% else %}—{% endif %}</td>
+                        <td>{{ movement.actor.full_name|default:"Sistema" }}</td>
+                        <td>{{ movement.reason|default:"—" }}</td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="8">Nenhuma movimentação registrada.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}Comanda #{{ order.pk }} — SPS{% endblock %}
+
+{% block content %}
+<section>
+    <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
+        <div>
+            <h2 style="margin: 0;">Comanda #{{ order.pk }}</h2>
+            <div class="helptext">
+                Cliente: <strong>{{ order.client.full_name|default:"Venda avulsa" }}</strong>
+                {% if order.appointment_id %} • Origem: <a href="{% url 'scheduling:appointment_detail' order.appointment_id %}">Agendamento #{{ order.appointment_id }}</a>{% endif %}
+                • Aberta em {{ order.created_at|date:'d/m/Y H:i' }}{% if order.opened_by %} por {{ order.opened_by.full_name }}{% endif %}
+            </div>
+        </div>
+        <span class="sps-badge {% if order.status == 'aberta' %}sps-badge-warning{% elif order.status == 'fechada_paga' %}sps-badge-success{% else %}sps-badge-danger{% endif %}">
+            {{ order.get_status_display }}
+        </span>
+    </div>
+
+    <div class="sps-grid-kpi" style="margin-top: 1.25rem;">
+        <div class="sps-kpi-card"><div class="sps-kpi-label">Subtotal Serviços</div><div class="sps-kpi-value">R$ {{ order.subtotal_services }}</div></div>
+        <div class="sps-kpi-card"><div class="sps-kpi-label">Subtotal Produtos</div><div class="sps-kpi-value">R$ {{ order.subtotal_products }}</div></div>
+        <div class="sps-kpi-card"><div class="sps-kpi-label">Desconto / Acréscimo</div><div class="sps-kpi-value" style="font-size: 1.3rem;">− R$ {{ order.discount_amount }} / + R$ {{ order.surcharge_amount }}</div></div>
+        <div class="sps-kpi-card"><div class="sps-kpi-label">Total Líquido</div><div class="sps-kpi-value" style="color: var(--sps-primary);">R$ {{ order.total_amount }}</div></div>
+    </div>
+
+    {% if order.status == 'cancelada' %}
+        <div class="sps-alert sps-alert-error">
+            Comanda cancelada em {{ order.cancelled_at|date:'d/m/Y H:i' }}. Motivo: {{ order.cancellation_reason }}
+        </div>
+    {% endif %}
+
+    <h3>Serviços Executados</h3>
+    <div class="sps-table-wrap">
+        <table>
+            <thead><tr><th>Serviço</th><th>Profissional</th><th>Bruto</th><th>Desconto</th><th>Líquido</th>{% if order.is_open %}<th>Ações</th>{% endif %}</tr></thead>
+            <tbody>
+                {% for item in order.service_items.all %}
+                    <tr>
+                        <td>{{ item.service.name }}</td>
+                        <td>{{ item.professional.full_name }}</td>
+                        <td>R$ {{ item.gross_price }}</td>
+                        <td>R$ {{ item.discount_amount }}</td>
+                        <td><strong>R$ {{ item.net_price }}</strong></td>
+                        {% if order.is_open %}
+                            <td>
+                                <form method="post" action="{% url 'orders:order_remove_service' order.pk item.pk %}" style="margin: 0;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-secondary">Remover</button>
+                                </form>
+                            </td>
+                        {% endif %}
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="6">Nenhum serviço lançado.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <h3>Produtos Vendidos</h3>
+    <div class="sps-table-wrap">
+        <table>
+            <thead><tr><th>Produto</th><th>Quantidade</th><th>Unitário</th><th>Total</th>{% if order.is_open %}<th>Ações</th>{% endif %}</tr></thead>
+            <tbody>
+                {% for item in order.product_items.all %}
+                    <tr>
+                        <td>{{ item.product.name }}</td>
+                        <td>{{ item.quantity }} {{ item.product.unit }}</td>
+                        <td>R$ {{ item.unit_price }}</td>
+                        <td><strong>R$ {{ item.total_price }}</strong></td>
+                        {% if order.is_open %}
+                            <td>
+                                <form method="post" action="{% url 'orders:order_remove_product' order.pk item.pk %}" style="margin: 0;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-secondary">Remover</button>
+                                </form>
+                            </td>
+                        {% endif %}
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="5">Nenhum produto lançado.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if order.is_open %}
+        <div class="sps-grid-2">
+            <div class="sps-card">
+                <h3>Adicionar Serviço</h3>
+                <form method="post" action="{% url 'orders:order_add_service' order.pk %}" novalidate>
+                    {% csrf_token %}
+                    {{ service_item_form.as_p }}
+                    <button type="submit" class="btn-primary">Adicionar Serviço</button>
+                </form>
+            </div>
+            <div class="sps-card">
+                <h3>Adicionar Produto</h3>
+                <form method="post" action="{% url 'orders:order_add_product' order.pk %}" novalidate>
+                    {% csrf_token %}
+                    {{ product_item_form.as_p }}
+                    <button type="submit" class="btn-primary">Adicionar Produto</button>
+                </form>
+            </div>
+            <div class="sps-card">
+                <h3>Desconto e Acréscimo Gerais</h3>
+                <form method="post" action="{% url 'orders:order_adjust' order.pk %}" novalidate>
+                    {% csrf_token %}
+                    {{ adjustment_form.as_p }}
+                    <button type="submit" class="btn-secondary">Aplicar Ajustes</button>
+                </form>
+            </div>
+            <div class="sps-card">
+                <h3>Cancelar Comanda</h3>
+                <form method="post" action="{% url 'orders:order_cancel' order.pk %}" novalidate>
+                    {% csrf_token %}
+                    {{ cancel_form.as_p }}
+                    <button type="submit" class="btn-danger">Cancelar Comanda</button>
+                </form>
+            </div>
+        </div>
+        <div class="sps-alert sps-alert-warning">
+            O fechamento e pagamento no caixa (baixa definitiva de estoque, comissões e registro fiscal) será habilitado na Sprint 07.
+        </div>
+    {% endif %}
+
+    <p style="margin-top: 1rem;"><a href="{% url 'orders:order_list' %}" class="btn-secondary">Voltar para Comandas</a></p>
+</section>
+{% endblock %}

@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     'scheduling.apps.SchedulingConfig',
     'catalog.apps.CatalogConfig',
     'clients.apps.ClientsConfig',
+    'inventory.apps.InventoryConfig',
+    'orders.apps.OrdersConfig',
 ]
 
 MIDDLEWARE = [

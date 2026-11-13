@@ -39,6 +39,18 @@
                                 </svg>
                                 <span>Clientes</span>
                             </a>
+                            <a href="{% url 'orders:order_list' %}" class="sps-nav-link {% if request.resolver_match.namespace == 'orders' %}is-active{% endif %}">
+                                <svg class="sps-nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                                </svg>
+                                <span>Comandas</span>
+                            </a>
+                            <a href="{% url 'inventory:product_list' %}" class="sps-nav-link {% if request.resolver_match.namespace == 'inventory' %}is-active{% endif %}">
+                                <svg class="sps-nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                                </svg>
+                                <span>Estoque</span>
+                            </a>
                         {% endif %}
                         <a href="{% url 'catalog:service_list' %}" class="sps-nav-link {% if request.resolver_match.url_name == 'service_list' %}is-active{% endif %}">
                             <svg class="sps-nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -133,6 +145,8 @@
                     <a href="{% url 'scheduling:appointment_list' %}" class="sps-nav-link">Agenda</a>
                     {% if user.role == 'gestor' or user.role == 'recepcionista' %}
                         <a href="{% url 'clients:client_list' %}" class="sps-nav-link">Clientes</a>
+                        <a href="{% url 'orders:order_list' %}" class="sps-nav-link">Comandas</a>
+                        <a href="{% url 'inventory:product_list' %}" class="sps-nav-link">Estoque</a>
                     {% endif %}
                     <a href="{% url 'catalog:service_list' %}" class="sps-nav-link">Serviços</a>
                     <a href="{% url 'catalog:commission_rule_list' %}" class="sps-nav-link">Comissões</a>

@@ -54,5 +54,17 @@
         {{ status_form.as_p }}
         <button type="submit">Atualizar Status</button>
     </form>
+
+    {% if user.role == 'gestor' or user.role == 'recepcionista' %}
+        <h3 style="margin-top: 1.5rem;">Comanda de Atendimento</h3>
+        {% if appointment.status == 'em_atendimento' or appointment.status == 'concluido' %}
+            <form method="post" action="{% url 'orders:order_from_appointment' appointment.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="btn-primary">Abrir Comanda a partir deste Agendamento</button>
+            </form>
+        {% else %}
+            <p class="helptext">A comanda pode ser aberta quando o agendamento estiver "Em atendimento" ou "Concluído".</p>
+        {% endif %}
+    {% endif %}
 </section>
 {% endblock %}

@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Estoque de Produtos — SPS{% endblock %}
+
+{% block content %}
+<section>
+    <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
+        <h2 style="margin: 0;">Estoque de Produtos — {{ request.salon.trade_name }}</h2>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <a href="{% url 'inventory:movement_list' %}" class="btn-secondary">Livro de Movimentações</a>
+            {% if user.role == 'gestor' %}
+                <a href="{% url 'inventory:movement_create' %}" class="btn-secondary">+ Movimentação</a>
+                <a href="{% url 'inventory:product_create' %}" class="btn-primary">+ Novo Produto</a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if low_stock_products %}
+        <div class="sps-alert sps-alert-warning" style="margin-top: 1rem;">
+            <strong>Alerta de reposição:</strong> {{ low_stock_products|length }} produto(s) com saldo igual ou abaixo do estoque mínimo:
+            {% for product in low_stock_products %}
+                {{ product.name }} ({{ product.current_stock }}/{{ product.min_stock_alert }}){% if not forloop.last %}, {% endif %}
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <form method="get" style="display: flex; gap: 0.75rem; align-items: flex-end; flex-wrap: wrap; margin: 1rem 0;">
+        <div style="flex: 1; min-width: 200px;">
+            <label for="q">Buscar produto</label>
+            <input type="text" id="q" name="q" value="{{ search_query }}" placeholder="Nome ou SKU">
+        </div>
+        <div style="min-width: 180px;">
+            <label for="usage">Tipo de uso</label>
+            <select id="usage" name="usage">
+                <option value="">Todos</option>
+                {% for value, label in usage_choices %}
+                    <option value="{{ value }}" {% if selected_usage == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <label style="display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.5rem;">
+            <input type="checkbox" name="low_stock" value="1" {% if low_stock_only %}checked{% endif %} style="width: auto;">
+            Somente estoque baixo
+        </label>
+        <button type="submit" class="btn-secondary">Filtrar</button>
+    </form>
+
+    <div class="sps-table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Produto</th>
+                    <th>SKU</th>
+                    <th>Tipo</th>
+                    <th>Custo / Venda</th>
+                    <th>Saldo</th>
+                    <th>Mínimo</th>
+                    <th>NCM / CFOP</th>
+                    <th>Status</th>
+                    {% if user.role == 'gestor' %}<th>Ações</th>{% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                    <tr>
+                        <td><strong>{{ product.name }}</strong></td>
+                        <td class="sps-mono">{{ product.sku|default:"—" }}</td>
+                        <td>{{ product.get_usage_type_display }}</td>
+                        <td>R$ {{ product.cost_price }} / R$ {{ product.sale_price }}</td>
+                        <td>
+                            <span class="sps-badge {% if product.is_below_min_stock %}sps-badge-danger{% else %}sps-badge-success{% endif %}">
+                                {{ product.current_stock }} {{ product.unit }}
+                            </span>
+                        </td>
+                        <td>{{ product.min_stock_alert }}</td>
+                        <td class="sps-mono">{{ product.ncm_code|default:"—" }} / {{ product.cfop_default|default:"—" }}</td>
+                        <td>{% if product.is_active %}Ativo{% else %}Inativo{% endif %}</td>
+                        {% if user.role == 'gestor' %}
+                            <td>
+                                <a href="{% url 'inventory:product_edit' product.pk %}">Editar</a> |
+                                <a href="{% url 'inventory:movement_create' %}?product={{ product.pk }}">Movimentar</a>
+                            </td>
+                        {% endif %}
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="9">Nenhum produto encontrado neste salão.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

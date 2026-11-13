@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}{% if object %}Editar Produto{% else %}Novo Produto{% endif %} — SPS{% endblock %}
+
+{% block content %}
+<section>
+    <h2>{% if object %}Editar Produto: {{ object.name }}{% else %}Novo Produto{% endif %}</h2>
+    {% if object %}
+        <div class="sps-alert">
+            Saldo atual: <strong>{{ object.current_stock }} {{ object.unit }}</strong>.
+            O saldo só pode ser alterado por <a href="{% url 'inventory:movement_create' %}?product={{ object.pk }}">movimentações auditadas</a>.
+        </div>
+    {% endif %}
+    <form method="post" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+            <div class="sps-alert sps-alert-error" role="alert">{{ form.non_field_errors }}</div>
+        {% endif %}
+        {{ form.as_p }}
+        <div style="display: flex; gap: 0.5rem;">
+            <button type="submit" class="btn-primary">Salvar Produto</button>
+            <a href="{% url 'inventory:product_list' %}" class="btn-secondary">Voltar</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

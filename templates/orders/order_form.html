@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Nova Comanda — SPS{% endblock %}
+
+{% block content %}
+<section>
+    <h2>Abrir Comanda Avulsa</h2>
+    <p class="helptext" style="margin-bottom: 1rem;">
+        Para atendimentos agendados, prefira abrir a comanda pela tela de detalhe do agendamento
+        (os serviços e o profissional são importados automaticamente).
+    </p>
+    <form method="post" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+            <div class="sps-alert sps-alert-error" role="alert">{{ form.non_field_errors }}</div>
+        {% endif %}
+        {{ form.as_p }}
+        <div style="display: flex; gap: 0.5rem;">
+            <button type="submit" class="btn-primary">Abrir Comanda</button>
+            <a href="{% url 'orders:order_list' %}" class="btn-secondary">Voltar</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

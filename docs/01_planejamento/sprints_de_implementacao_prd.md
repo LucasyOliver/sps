@@ -94,16 +94,16 @@ modulo_pai: "prd_do_projeto.md"
 
 ## Sprint 06: Controle de Estoque de Produtos e Comandas de Atendimento
 
-- **Solicitação do usuário:** `pendente`
+- **Solicitação do usuário:** `solicitada e concluída em 2026-11-13`
 - **Requisitos atendidos:** `RF-007`, `RF-008`, `RNF-001`, `RNF-002`
 - **Pré-condições:** `Sprint 05` concluída.
 - **Tarefas da Sprint:**
-  - [ ] `S06-T01`: Criar app `inventory` com `Product` (tipo `venda`/`consumo_interno`/`ambos`, custo, preço de venda, `current_stock`, `min_stock_alert` e metadados fiscais NCM, CEST, CFOP, origem e alíquotas) e `StockMovement`.
-  - [ ] `S06-T02`: Implementar serviço de movimentação manual de estoque (entradas de compra, baixas por consumo interno e ajustes auditados) com bloqueio de saldo negativo e listagem de alertas (`current_stock <= min_stock_alert`).
-  - [ ] `S06-T03`: Criar app `orders` com `ServiceOrder`, `OrderServiceItem` (vinculando serviço e profissional executante) e `OrderProductItem` (vinculando produto do estoque e quantidade), permitindo abrir comanda a partir de um `Appointment` ou avulsa.
-  - [ ] `S06-T04`: Implementar CBVs de gestão de Estoque e operação de Comandas abertas (adição/remoção de itens, descontos e cálculo de totais).
-  - [ ] `S06-T05`: Escrever e executar testes automatizados (`DEC-001`) de movimentação de estoque, alerta de estoque mínimo e cálculo de comanda mista (serviços + produtos).
-  - [ ] `S06-T06`: Revisar incremento, registrar `evidencias_da_sprint_006.md` e entregar para ação de Git/GitHub do usuário.
+  - [x] `S06-T01`: Criar app `inventory` com `Product` (tipo `venda`/`consumo_interno`/`ambos`, custo, preço de venda, `current_stock`, `min_stock_alert` e metadados fiscais NCM, CEST, CFOP, origem e alíquotas) e `StockMovement`.
+  - [x] `S06-T02`: Implementar serviço de movimentação manual de estoque (entradas de compra, baixas por consumo interno e ajustes auditados) com bloqueio de saldo negativo e listagem de alertas (`current_stock <= min_stock_alert`).
+  - [x] `S06-T03`: Criar app `orders` com `ServiceOrder`, `OrderServiceItem` (vinculando serviço e profissional executante) e `OrderProductItem` (vinculando produto do estoque e quantidade), permitindo abrir comanda a partir de um `Appointment` ou avulsa.
+  - [x] `S06-T04`: Implementar CBVs de gestão de Estoque e operação de Comandas abertas (adição/remoção de itens, descontos e cálculo de totais).
+  - [x] `S06-T05`: Escrever e executar testes automatizados (`DEC-001`) de movimentação de estoque, alerta de estoque mínimo e cálculo de comanda mista (serviços + produtos).
+  - [x] `S06-T06`: Revisar incremento, registrar `evidencias_da_sprint_006.md` e entregar para ação de Git/GitHub do usuário.
 
 ---
 
