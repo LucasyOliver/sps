@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Detalhes do Agendamento — SPS{% endblock %}
+
+{% block content %}
+<section>
+    <h2>Detalhes do Agendamento #{{ appointment.pk }}</h2>
+    <p>
+        <a href="{% url 'scheduling:appointment_list' %}">Voltar para Agenda</a> |
+        <a href="{% url 'scheduling:appointment_reschedule' appointment.pk %}">Remarcar Horário / Serviços</a>
+    </p>
+
+    <ul>
+        <li><strong>Cliente:</strong> {{ appointment.client.full_name }} ({{ appointment.client.phone }})</li>
+        <li><strong>Profissional:</strong> {{ appointment.professional.full_name }}</li>
+        <li><strong>Início:</strong> {{ appointment.start_at|date:'d/m/Y H:i' }}</li>
+        <li><strong>Fim Estimado:</strong> {{ appointment.end_at|date:'d/m/Y H:i' }}</li>
+        <li><strong>Duração Total:</strong> {{ appointment.total_duration_minutes }} minutos</li>
+        <li><strong>Valor Total Estimado:</strong> R$ {{ appointment.total_estimated_amount }}</li>
+        <li><strong>Status Atual:</strong> {{ appointment.get_status_display }}</li>
+        <li><strong>Token Público:</strong> <code>{{ appointment.public_token }}</code></li>
+        <li><strong>Observações:</strong> {{ appointment.notes|default:"—" }}</li>
+        {% if appointment.cancellation_reason %}
+            <li><strong>Motivo do Cancelamento:</strong> {{ appointment.cancellation_reason }} (em {{ appointment.cancelled_at|date:'d/m/Y H:i' }})</li>
+        {% endif %}
+    </ul>
+
+    <h3>Serviços Selecionados no Agendamento</h3>
+    <table border="1" cellpadding="6" cellspacing="0">
+        <thead>
+            <tr>
+                <th>Serviço</th>
+                <th>Duração Snapshot (min)</th>
+                <th>Preço Snapshot (R$)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in appointment.items.all %}
+                <tr>
+                    <td>{{ item.service.name }}</td>
+                    <td>{{ item.duration_minutes_snapshot }} min</td>
+                    <td>R$ {{ item.price_snapshot }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h3>Atualizar Status do Atendimento</h3>
+    <form method="post" action="{% url 'scheduling:appointment_status' appointment.pk %}">
+        {% csrf_token %}
+        {{ status_form.as_p }}
+        <button type="submit">Atualizar Status</button>
+    </form>
+</section>
+{% endblock %}

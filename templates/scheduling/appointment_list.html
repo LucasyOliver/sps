@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Agenda Inteligente — SPS{% endblock %}
+
+{% block content %}
+<section>
+    <h2>Agenda Inteligente — {{ request.salon.trade_name }}</h2>
+    <p>
+        <a href="{% url 'scheduling:appointment_create' %}">+ Novo Agendamento</a> |
+        <a href="{% url 'scheduling:professional_schedules' %}">Expedientes dos Profissionais</a> |
+        <a href="{% url 'scheduling:schedule_blocks' %}">Bloqueios de Agenda</a>
+    </p>
+
+    <form method="get">
+        <label for="date">Data:</label>
+        <input type="date" id="date" name="date" value="{{ reference_date|date:'Y-m-d' }}">
+        <label for="view">Visão:</label>
+        <select id="view" name="view">
+            <option value="day" {% if view_mode == 'day' %}selected{% endif %}>Diária</option>
+            <option value="week" {% if view_mode == 'week' %}selected{% endif %}>Semanal</option>
+        </select>
+        {% if user.role != 'profissional' %}
+            <label for="professional">Profissional:</label>
+            <select id="professional" name="professional">
+                <option value="">Todos</option>
+                {% for prof in professionals %}
+                    <option value="{{ prof.pk }}" {% if selected_professional == prof.pk|stringformat:"s" %}selected{% endif %}>
+                        {{ prof.full_name }}
+                    </option>
+                {% endfor %}
+            </select>
+        {% endif %}
+        <button type="submit">Filtrar Agenda</button>
+    </form>
+
+    {% if available_slots %}
+        <div style="margin: 12px 0;">
+            <strong>Horários livres sugeridos ({{ reference_date|date:'d/m/Y' }} — base 30 min):</strong>
+            {% for slot in available_slots %}
+                <span>[{{ slot|date:'H:i' }}]</span>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <table border="1" cellpadding="6" cellspacing="0">
+        <thead>
+            <tr>
+                <th>Início — Fim</th>
+                <th>Cliente</th>
+                <th>Profissional</th>
+                <th>Serviços Agendados</th>
+                <th>Duração Total</th>
+                <th>Valor Estimado</th>
+                <th>Status</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for appt in appointments %}
+                <tr>
+                    <td>{{ appt.start_at|date:'d/m/Y H:i' }} às {{ appt.end_at|date:'H:i' }}</td>
+                    <td>{{ appt.client.full_name }}</td>
+                    <td>{{ appt.professional.full_name }}</td>
+                    <td>
+                        {% for item in appt.items.all %}
+                            {{ item.service.name }} ({{ item.duration_minutes_snapshot }} min){% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td>{{ appt.total_duration_minutes }} min</td>
+                    <td>R$ {{ appt.total_estimated_amount }}</td>
+                    <td>{{ appt.get_status_display }}</td>
+                    <td>
+                        <a href="{% url 'scheduling:appointment_detail' appt.pk %}">Detalhes / Status</a> |
+                        <a href="{% url 'scheduling:appointment_reschedule' appt.pk %}">Remarcar</a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="8">Nenhum agendamento encontrado para os filtros selecionados.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endblock %}

@@ -1,3 +1,6 @@
+from datetime import timedelta
+from decimal import Decimal
+import uuid
 from django.core.exceptions import ValidationError
 from django.db import models
 from base.models import TenantScopedModel
@@ -9,6 +12,22 @@ class ScheduleBlockTypeChoices(models.TextChoices):
     DAY_OFF = 'folga', 'Folga'
     ABSENCE = 'ausencia', 'Ausência / Compromisso'
     OTHER = 'outro', 'Outro bloqueio'
+
+
+class AppointmentStatusChoices(models.TextChoices):
+    SCHEDULED = 'agendado', 'Agendado'
+    CONFIRMED = 'confirmado', 'Confirmado'
+    IN_PROGRESS = 'em_atendimento', 'Em atendimento'
+    COMPLETED = 'concluido', 'Concluído'
+    CANCELLED = 'cancelado', 'Cancelado'
+    NO_SHOW = 'nao_compareceu', 'Não compareceu'
+
+
+ACTIVE_APPOINTMENT_STATUSES = (
+    AppointmentStatusChoices.SCHEDULED,
+    AppointmentStatusChoices.CONFIRMED,
+    AppointmentStatusChoices.IN_PROGRESS,
+)
 
 
 class ProfessionalSchedule(TenantScopedModel):
@@ -152,3 +171,149 @@ class ScheduleBlock(TenantScopedModel):
             raise ValidationError(
                 {'end_at': 'A data/hora final do bloqueio deve ser posterior à data/hora inicial.'}
             )
+
+
+class Appointment(TenantScopedModel):
+    client = models.ForeignKey(
+        'clients.Client',
+        on_delete=models.PROTECT,
+        related_name='appointments',
+        verbose_name='Cliente',
+    )
+    professional = models.ForeignKey(
+        'accounts.User',
+        on_delete=models.PROTECT,
+        related_name='appointments',
+        verbose_name='Profissional',
+    )
+    start_at = models.DateTimeField('Início do agendamento')
+    end_at = models.DateTimeField('Fim estimado do agendamento')
+    total_duration_minutes = models.PositiveIntegerField(
+        'Duração total estimada (min)',
+        default=30,
+    )
+    total_estimated_amount = models.DecimalField(
+        'Valor total estimado (R$)',
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal('0.00'),
+    )
+    status = models.CharField(
+        'Status',
+        max_length=25,
+        choices=AppointmentStatusChoices.choices,
+        default=AppointmentStatusChoices.SCHEDULED,
+    )
+    notes = models.TextField('Observações', blank=True)
+    public_token = models.UUIDField(
+        'Token público',
+        default=uuid.uuid4,
+        unique=True,
+        editable=False,
+    )
+    cancellation_reason = models.CharField(
+        'Motivo do cancelamento',
+        max_length=200,
+        blank=True,
+    )
+    cancelled_at = models.DateTimeField('Cancelado em', null=True, blank=True)
+    created_by = models.ForeignKey(
+        'accounts.User',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='created_appointments',
+        verbose_name='Criado por',
+    )
+
+    class Meta:
+        verbose_name = 'Agendamento'
+        verbose_name_plural = 'Agendamentos'
+        ordering = ['start_at']
+        indexes = [
+            models.Index(
+                fields=['salon', 'professional', 'start_at', 'end_at'],
+                name='idx_appt_salon_prof_interval',
+            ),
+        ]
+
+    def __str__(self):
+        return (
+            f'{self.client.full_name} com {self.professional.full_name} — '
+            f'{self.start_at:%d/%m/%Y %H:%M} ({self.get_status_display()})'
+        )
+
+    def overlaps(self, interval_start, interval_end):
+        return self.start_at < interval_end and self.end_at > interval_start
+
+    def recalculate_totals_from_items(self):
+        items = list(self.items.all())
+        total_minutes = sum(item.duration_minutes_snapshot for item in items)
+        total_amount = sum(
+            (item.price_snapshot for item in items),
+            Decimal('0.00'),
+        )
+        self.total_duration_minutes = total_minutes
+        self.total_estimated_amount = total_amount
+        if self.start_at and total_minutes > 0:
+            self.end_at = self.start_at + timedelta(minutes=total_minutes)
+
+    def clean(self):
+        super().clean()
+        errors = {}
+        if self.client_id and self.salon_id:
+            if self.client.salon_id != self.salon_id:
+                errors['client'] = 'O cliente selecionado pertence a outro salão.'
+        if self.professional_id and self.salon_id:
+            if self.professional.salon_id != self.salon_id:
+                errors['professional'] = 'O profissional selecionado pertence a outro salão.'
+        if self.start_at and self.end_at and self.start_at >= self.end_at:
+            errors['end_at'] = 'O horário de término deve ser posterior ao horário de início.'
+        if errors:
+            raise ValidationError(errors)
+
+
+class AppointmentItem(TenantScopedModel):
+    appointment = models.ForeignKey(
+        Appointment,
+        on_delete=models.CASCADE,
+        related_name='items',
+        verbose_name='Agendamento',
+    )
+    service = models.ForeignKey(
+        'catalog.Service',
+        on_delete=models.PROTECT,
+        related_name='appointment_items',
+        verbose_name='Serviço',
+    )
+    duration_minutes_snapshot = models.PositiveIntegerField(
+        'Duração no agendamento (min)',
+    )
+    price_snapshot = models.DecimalField(
+        'Preço no agendamento (R$)',
+        max_digits=10,
+        decimal_places=2,
+    )
+
+    class Meta:
+        verbose_name = 'Item de serviço do agendamento'
+        verbose_name_plural = 'Itens de serviço do agendamento'
+        ordering = ['id']
+
+    def __str__(self):
+        return (
+            f'{self.service.name} ({self.duration_minutes_snapshot} min - '
+            f'R$ {self.price_snapshot})'
+        )
+
+    def clean(self):
+        super().clean()
+        errors = {}
+        if self.appointment_id and self.salon_id:
+            if self.appointment.salon_id != self.salon_id:
+                errors['appointment'] = 'O agendamento selecionado pertence a outro salão.'
+        if self.service_id and self.salon_id:
+            if self.service.salon_id != self.salon_id:
+                errors['service'] = 'O serviço selecionado pertence a outro salão.'
+        if errors:
+            raise ValidationError(errors)

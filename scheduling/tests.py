@@ -1,16 +1,23 @@
-from datetime import datetime, time
+from datetime import date, datetime, time
+from decimal import Decimal
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 from accounts.models import UserRoleChoices
-from salons.models import Salon, SalonBusinessHours, WeekdayChoices
+from catalog.models import Service, ServiceCategory
+from clients.models import Client
+from salons.models import Salon, SalonBusinessHours, SalonHoliday, WeekdayChoices
+from scheduling.forms import AppointmentCreateForm
 from scheduling.models import (
+    Appointment,
+    AppointmentStatusChoices,
     ProfessionalSchedule,
     ScheduleBlock,
     ScheduleBlockTypeChoices,
 )
+from scheduling.services import AvailabilityService, SchedulingService
 
 User = get_user_model()
 
@@ -48,6 +55,13 @@ class ProfessionalScheduleAndBlockTests(TestCase):
             role=UserRoleChoices.GESTOR,
             salon=self.salon_a,
         )
+        self.recep_a = User.objects.create_user(
+            email='recep@alpha.com.br',
+            password='StrongPassword123!',
+            full_name='Recepção Alpha',
+            role=UserRoleChoices.RECEPCIONISTA,
+            salon=self.salon_a,
+        )
         self.prof_a1 = User.objects.create_user(
             email='ana@alpha.com.br',
             password='StrongPassword123!',
@@ -56,9 +70,9 @@ class ProfessionalScheduleAndBlockTests(TestCase):
             salon=self.salon_a,
         )
         self.prof_a2 = User.objects.create_user(
-            email='bia@alpha.com.br',
+            email='carlos@alpha.com.br',
             password='StrongPassword123!',
-            full_name='Bia Especialista',
+            full_name='Carlos Especialista',
             role=UserRoleChoices.PROFISSIONAL,
             salon=self.salon_a,
         )
@@ -68,6 +82,67 @@ class ProfessionalScheduleAndBlockTests(TestCase):
             full_name='Carlos Beta',
             role=UserRoleChoices.PROFISSIONAL,
             salon=self.salon_b,
+        )
+
+        ProfessionalSchedule.objects.create(
+            salon=self.salon_a,
+            professional=self.prof_a2,
+            weekday=WeekdayChoices.MONDAY,
+            is_working=True,
+            start_time=time(9, 0),
+            end_time=time(18, 0),
+            break_start_time=time(12, 0),
+            break_end_time=time(13, 0),
+        )
+        ProfessionalSchedule.objects.create(
+            salon=self.salon_a,
+            professional=self.prof_a1,
+            weekday=WeekdayChoices.MONDAY,
+            is_working=True,
+            start_time=time(9, 0),
+            end_time=time(18, 0),
+        )
+
+        self.cat_a = ServiceCategory.objects.create(
+            salon=self.salon_a,
+            name='Barbearia e Cabelo',
+        )
+        self.srv_30m = Service.objects.create(
+            salon=self.salon_a,
+            category=self.cat_a,
+            name='Corte Masculino',
+            duration_minutes=30,
+            base_price=Decimal('50.00'),
+            default_commission_pct=Decimal('40.00'),
+        )
+        self.srv_30m.professionals.add(self.prof_a1, self.prof_a2)
+
+        self.srv_45m = Service.objects.create(
+            salon=self.salon_a,
+            category=self.cat_a,
+            name='Barba Completa + Hidratação',
+            duration_minutes=45,
+            base_price=Decimal('70.00'),
+            default_commission_pct=Decimal('45.00'),
+        )
+        self.srv_45m.professionals.add(self.prof_a2)
+
+        self.srv_b = Service.objects.create(
+            salon=self.salon_b,
+            name='Serviço Beta',
+            duration_minutes=30,
+            base_price=Decimal('60.00'),
+        )
+
+        self.client_a = Client.objects.create(
+            salon=self.salon_a,
+            full_name='Cliente Maria',
+            phone='11977776666',
+        )
+        self.client_b = Client.objects.create(
+            salon=self.salon_b,
+            full_name='Cliente Beta',
+            phone='11955554444',
         )
 
     def test_professional_schedule_must_fit_within_salon_business_hours(self):
@@ -92,20 +167,6 @@ class ProfessionalScheduleAndBlockTests(TestCase):
         )
         with self.assertRaises(ValidationError):
             closed_day_schedule.full_clean()
-
-        valid_schedule = ProfessionalSchedule(
-            salon=self.salon_a,
-            professional=self.prof_a1,
-            weekday=WeekdayChoices.MONDAY,
-            is_working=True,
-            start_time=time(9, 0),
-            end_time=time(18, 0),
-            break_start_time=time(12, 0),
-            break_end_time=time(13, 0),
-        )
-        valid_schedule.full_clean()
-        valid_schedule.save()
-        self.assertEqual(ProfessionalSchedule.objects.for_salon(self.salon_a).count(), 1)
 
     def test_cross_tenant_professional_assignment_is_rejected(self):
         cross_schedule = ProfessionalSchedule(
@@ -154,7 +215,6 @@ class ProfessionalScheduleAndBlockTests(TestCase):
             )
         )
 
-        # Profissional A1 vê apenas o próprio bloqueio e recebe 404 ao tentar excluir bloqueio de A2
         self.client.force_login(self.prof_a1)
         list_resp = self.client.get(reverse('scheduling:schedule_blocks'))
         self.assertEqual(list_resp.status_code, 200)
@@ -166,3 +226,244 @@ class ProfessionalScheduleAndBlockTests(TestCase):
         )
         self.assertEqual(delete_other_resp.status_code, 404)
         self.assertTrue(ScheduleBlock.objects.filter(pk=block_a2.pk).exists())
+
+    def test_multi_service_duration_sum_and_double_booking_rejection(self):
+        """
+        RF-005 Critério de aceite: 2 serviços (30m + 45m = 75m) agendados às 14:00 para Carlos
+        reservam das 14:00 às 15:15; tentativa concorrente às 15:00 é rejeitada.
+        """
+        tz = timezone.get_current_timezone()
+        monday_14h = timezone.make_aware(datetime(2026, 11, 16, 14, 0), tz)
+
+        appt = SchedulingService.create_appointment(
+            salon=self.salon_a,
+            client=self.client_a,
+            professional=self.prof_a2,
+            start_at=monday_14h,
+            services=[self.srv_30m, self.srv_45m],
+            created_by=self.recep_a,
+        )
+
+        self.assertEqual(appt.total_duration_minutes, 75)
+        self.assertEqual(appt.total_estimated_amount, Decimal('120.00'))
+        self.assertEqual(
+            timezone.localtime(appt.end_at, tz),
+            timezone.make_aware(datetime(2026, 11, 16, 15, 15), tz),
+        )
+        self.assertEqual(appt.items.count(), 2)
+
+        # Tentativa de agendar Carlos às 15:00 (conflita com 14:00..15:15) -> ValidationError
+        monday_15h = timezone.make_aware(datetime(2026, 11, 16, 15, 0), tz)
+        with self.assertRaises(ValidationError):
+            SchedulingService.create_appointment(
+                salon=self.salon_a,
+                client=self.client_a,
+                professional=self.prof_a2,
+                start_at=monday_15h,
+                services=[self.srv_30m],
+            )
+
+        # Agendar exatamente às 15:15 (após término) deve ser permitido
+        monday_15h15 = timezone.make_aware(datetime(2026, 11, 16, 15, 15), tz)
+        appt_after = SchedulingService.create_appointment(
+            salon=self.salon_a,
+            client=self.client_a,
+            professional=self.prof_a2,
+            start_at=monday_15h15,
+            services=[self.srv_30m],
+        )
+        self.assertEqual(appt_after.total_duration_minutes, 30)
+
+    def test_availability_service_respects_breaks_blocks_and_holidays(self):
+        """S04-T02: AvailabilityService bloqueia intervalo de almoço, ScheduleBlock e feriado."""
+        tz = timezone.get_current_timezone()
+        target_monday = date(2026, 11, 16)
+
+        # Bloqueio das 16:00 às 17:00 para Carlos
+        ScheduleBlock.objects.create(
+            salon=self.salon_a,
+            professional=self.prof_a2,
+            block_type=ScheduleBlockTypeChoices.ABSENCE,
+            start_at=timezone.make_aware(datetime(2026, 11, 16, 16, 0), tz),
+            end_at=timezone.make_aware(datetime(2026, 11, 16, 17, 0), tz),
+            reason='Saída externa',
+        )
+
+        # Tentativa no horário de almoço de Carlos (12:00 às 13:00) -> rejeitada
+        with self.assertRaises(ValidationError):
+            SchedulingService.create_appointment(
+                salon=self.salon_a,
+                client=self.client_a,
+                professional=self.prof_a2,
+                start_at=timezone.make_aware(datetime(2026, 11, 16, 12, 15), tz),
+                services=[self.srv_30m],
+            )
+
+        # Tentativa no bloqueio de agenda (16:00 às 17:00) -> rejeitada
+        with self.assertRaises(ValidationError):
+            SchedulingService.create_appointment(
+                salon=self.salon_a,
+                client=self.client_a,
+                professional=self.prof_a2,
+                start_at=timezone.make_aware(datetime(2026, 11, 16, 16, 0), tz),
+                services=[self.srv_30m],
+            )
+
+        slots = AvailabilityService.get_available_slots(
+            salon=self.salon_a,
+            professional=self.prof_a2,
+            target_date=target_monday,
+            services=[self.srv_30m],
+            slot_step_minutes=30,
+        )
+        slot_times = [timezone.localtime(s, tz).time() for s in slots]
+        self.assertIn(time(9, 0), slot_times)
+        self.assertNotIn(time(12, 0), slot_times)
+        self.assertNotIn(time(12, 30), slot_times)
+        self.assertNotIn(time(16, 0), slot_times)
+        self.assertNotIn(time(16, 30), slot_times)
+        self.assertIn(time(17, 0), slot_times)
+
+        # Cadastrando feriado na segunda-feira -> zero slots disponíveis
+        SalonHoliday.objects.create(
+            salon=self.salon_a,
+            date=target_monday,
+            description='Feriado Municipal',
+            is_closed_all_day=True,
+        )
+        self.assertEqual(
+            AvailabilityService.get_available_slots(
+                salon=self.salon_a,
+                professional=self.prof_a2,
+                target_date=target_monday,
+                services=[self.srv_30m],
+            ),
+            [],
+        )
+
+    def test_status_transitions_cancellation_reason_and_reschedule(self):
+        """S04-T03: Testa ciclo de vida de status, obrigatoriedade de motivo ao cancelar e remarcação."""
+        tz = timezone.get_current_timezone()
+        appt = SchedulingService.create_appointment(
+            salon=self.salon_a,
+            client=self.client_a,
+            professional=self.prof_a2,
+            start_at=timezone.make_aware(datetime(2026, 11, 16, 9, 0), tz),
+            services=[self.srv_30m],
+        )
+
+        # Remarcar para 10:00
+        appt = SchedulingService.reschedule_appointment(
+            appointment=appt,
+            new_start_at=timezone.make_aware(datetime(2026, 11, 16, 10, 0), tz),
+        )
+        self.assertEqual(timezone.localtime(appt.start_at, tz).time(), time(10, 0))
+
+        # Cancelar sem motivo deve falhar
+        with self.assertRaises(ValidationError):
+            SchedulingService.transition_status(
+                appointment=appt,
+                new_status=AppointmentStatusChoices.CANCELLED,
+                cancellation_reason='',
+            )
+
+        # Transições válidas: agendado -> confirmado -> em_atendimento -> concluido
+        appt = SchedulingService.transition_status(
+            appointment=appt,
+            new_status=AppointmentStatusChoices.CONFIRMED,
+        )
+        appt = SchedulingService.transition_status(
+            appointment=appt,
+            new_status=AppointmentStatusChoices.IN_PROGRESS,
+        )
+        appt = SchedulingService.transition_status(
+            appointment=appt,
+            new_status=AppointmentStatusChoices.COMPLETED,
+        )
+        self.assertEqual(appt.status, AppointmentStatusChoices.COMPLETED)
+
+        # Agendamento concluído não pode transicionar para cancelado
+        with self.assertRaises(ValidationError):
+            SchedulingService.transition_status(
+                appointment=appt,
+                new_status=AppointmentStatusChoices.CANCELLED,
+                cancellation_reason='Tentativa inválida',
+            )
+
+    def test_agenda_views_professional_scope_and_cross_tenant_isolation(self):
+        """SEC-A, SEC-B, SEC-C, SEC-D: Views da agenda respeitam escopo do profissional e isolamento multi-tenant."""
+        tz = timezone.get_current_timezone()
+        appt_a1 = SchedulingService.create_appointment(
+            salon=self.salon_a,
+            client=self.client_a,
+            professional=self.prof_a1,
+            start_at=timezone.make_aware(datetime(2026, 11, 16, 9, 0), tz),
+            services=[self.srv_30m],
+        )
+        appt_a2 = SchedulingService.create_appointment(
+            salon=self.salon_a,
+            client=self.client_a,
+            professional=self.prof_a2,
+            start_at=timezone.make_aware(datetime(2026, 11, 16, 10, 0), tz),
+            services=[self.srv_30m],
+        )
+        appt_b = Appointment.objects.create(
+            salon=self.salon_b,
+            client=self.client_b,
+            professional=self.prof_b,
+            start_at=timezone.make_aware(datetime(2026, 11, 16, 11, 0), tz),
+            end_at=timezone.make_aware(datetime(2026, 11, 16, 11, 30), tz),
+            total_duration_minutes=30,
+            total_estimated_amount=Decimal('60.00'),
+        )
+
+        # SEC-C: Profissional A1 vê apenas o próprio agendamento e recebe 404 no agendamento de A2
+        self.client.force_login(self.prof_a1)
+        resp_agenda = self.client.get(reverse('scheduling:appointment_list'))
+        self.assertEqual(resp_agenda.status_code, 200)
+        self.assertContains(resp_agenda, 'Ana Especialista')
+        self.assertNotContains(resp_agenda, 'Carlos Especialista')
+
+        self.assertEqual(
+            self.client.get(
+                reverse('scheduling:appointment_detail', args=[appt_a1.pk])
+            ).status_code,
+            200,
+        )
+        self.assertEqual(
+            self.client.get(
+                reverse('scheduling:appointment_detail', args=[appt_a2.pk])
+            ).status_code,
+            404,
+        )
+        self.assertEqual(
+            self.client.get(
+                reverse('scheduling:appointment_reschedule', args=[appt_a2.pk])
+            ).status_code,
+            404,
+        )
+
+        # SEC-B: Gestor do Salão A recebe 404 ao tentar acessar agendamento do Salão B
+        self.client.force_login(self.gestor_a)
+        self.assertEqual(
+            self.client.get(
+                reverse('scheduling:appointment_detail', args=[appt_b.pk])
+            ).status_code,
+            404,
+        )
+
+        # SEC-D: Formulário rejeita cliente, profissional ou serviço de outro salão
+        cross_form = AppointmentCreateForm(
+            data={
+                'client': self.client_b.pk,
+                'professional': self.prof_b.pk,
+                'services': [self.srv_b.pk],
+                'start_at': '2026-11-16T14:00',
+            },
+            salon=self.salon_a,
+            actor=self.gestor_a,
+        )
+        self.assertFalse(cross_form.is_valid())
+        self.assertIn('client', cross_form.errors)
+        self.assertIn('professional', cross_form.errors)
+        self.assertIn('services', cross_form.errors)

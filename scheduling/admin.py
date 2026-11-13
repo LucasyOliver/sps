@@ -1,33 +1,55 @@
 from django.contrib import admin
-from scheduling.models import ProfessionalSchedule, ScheduleBlock
+from scheduling.models import (
+    Appointment,
+    AppointmentItem,
+    ProfessionalSchedule,
+    ScheduleBlock,
+)
+
+
+class AppointmentItemInline(admin.TabularInline):
+    model = AppointmentItem
+    extra = 0
+
+
+@admin.register(Appointment)
+class AppointmentAdmin(admin.ModelAdmin):
+    list_display = (
+        'client',
+        'professional',
+        'salon',
+        'start_at',
+        'end_at',
+        'total_duration_minutes',
+        'total_estimated_amount',
+        'status',
+    )
+    list_filter = ('salon', 'status', 'professional')
+    search_fields = ('client__full_name', 'professional__full_name', 'salon__trade_name')
+    inlines = [AppointmentItemInline]
 
 
 @admin.register(ProfessionalSchedule)
 class ProfessionalScheduleAdmin(admin.ModelAdmin):
     list_display = (
-        'salon',
         'professional',
+        'salon',
         'weekday',
         'is_working',
         'start_time',
         'end_time',
-        'break_start_time',
-        'break_end_time',
     )
     list_filter = ('salon', 'weekday', 'is_working')
-    search_fields = ('professional__full_name', 'professional__email')
 
 
 @admin.register(ScheduleBlock)
 class ScheduleBlockAdmin(admin.ModelAdmin):
     list_display = (
-        'salon',
         'professional',
+        'salon',
         'block_type',
         'start_at',
         'end_at',
         'reason',
-        'created_by',
     )
     list_filter = ('salon', 'block_type')
-    search_fields = ('professional__full_name', 'reason')

@@ -65,16 +65,16 @@ modulo_pai: "prd_do_projeto.md"
 
 ## Sprint 04: Motor de Disponibilidade e Agenda Inteligente Interna (Múltiplos Serviços)
 
-- **Solicitação do usuário:** `pendente`
+- **Solicitação do usuário:** `solicitada e concluída em 2026-11-13`
 - **Requisitos atendidos:** `RF-005`, `RNF-001`, `RNF-002`
 - **Pré-condições:** `Sprint 03` concluída.
 - **Tarefas da Sprint:**
-  - [ ] `S04-T01`: Implementar modelos `Appointment` e `AppointmentItem` no app `scheduling`, suportando 1 ou mais serviços no mesmo agendamento com soma automática de `duration_minutes` e `total_estimated_amount`.
-  - [ ] `S04-T02`: Implementar `AvailabilityService` (cálculo de horários livres considerando expediente do salão, feriados, expediente do profissional, `ScheduleBlock` e agendamentos ativos).
-  - [ ] `S04-T03`: Implementar `SchedulingService` com bloqueio transacional (`transaction.atomic()` + `select_for_update()` no profissional) impedindo sobreposição de horários (`[start_at, end_at)`) e gerenciando transições de estado (`agendado`, `confirmado`, `em_atendimento`, `concluido`, `cancelado`, `nao_compareceu`).
-  - [ ] `S04-T04`: Implementar CBVs da Agenda Interna (visão diária/semanal por profissional, criação rápida, remarcação e mudança de status com escopo restrito ao próprio profissional quando perfil = `profissional`).
-  - [ ] `S04-T05`: Escrever e executar testes automatizados (`DEC-001`) cobrindo soma de múltiplos serviços, rejeição de *double-booking*, bloqueio em horário de folga e isolamento entre salões.
-  - [ ] `S04-T06`: Revisar incremento, registrar `evidencias_da_sprint_004.md` e entregar para ação de Git/GitHub do usuário.
+  - [x] `S04-T01`: Implementar modelos `Appointment` e `AppointmentItem` no app `scheduling`, suportando 1 ou mais serviços no mesmo agendamento com soma automática de `duration_minutes` e `total_estimated_amount`.
+  - [x] `S04-T02`: Implementar `AvailabilityService` (cálculo de horários livres considerando expediente do salão, feriados, expediente do profissional, `ScheduleBlock` e agendamentos ativos).
+  - [x] `S04-T03`: Implementar `SchedulingService` com bloqueio transacional (`transaction.atomic()` + `select_for_update()` no profissional) impedindo sobreposição de horários (`[start_at, end_at)`) e gerenciando transições de estado (`agendado`, `confirmado`, `em_atendimento`, `concluido`, `cancelado`, `nao_compareceu`).
+  - [x] `S04-T04`: Implementar CBVs da Agenda Interna (visão diária/semanal por profissional, criação rápida, remarcação e mudança de status com escopo restrito ao próprio profissional quando perfil = `profissional`).
+  - [x] `S04-T05`: Escrever e executar testes automatizados (`DEC-001`) cobrindo soma de múltiplos serviços, rejeição de *double-booking*, bloqueio em horário de folga e isolamento entre salões.
+  - [x] `S04-T06`: Revisar incremento, registrar `evidencias_da_sprint_004.md` e entregar para ação de Git/GitHub do usuário.
 
 ---
 

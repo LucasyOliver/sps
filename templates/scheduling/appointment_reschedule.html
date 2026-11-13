@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Remarcar Agendamento — SPS{% endblock %}
+
+{% block content %}
+<section>
+    <h2>Remarcar Agendamento #{{ appointment.pk }} — {{ appointment.client.full_name }}</h2>
+    <p>Horário atual: {{ appointment.start_at|date:'d/m/Y H:i' }} às {{ appointment.end_at|date:'H:i' }}</p>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Salvar Remarcação</button>
+        <a href="{% url 'scheduling:appointment_detail' appointment.pk %}">Cancelar</a>
+    </form>
+</section>
+{% endblock %}

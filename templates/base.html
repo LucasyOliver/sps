@@ -12,6 +12,7 @@
             <nav>
                 <a href="{% url 'base:home' %}">Início</a>
                 {% if user.salon %}
+                    | <a href="{% url 'scheduling:appointment_list' %}">Agenda</a>
                     | <a href="{% url 'catalog:service_list' %}">Serviços</a>
                     | <a href="{% url 'catalog:commission_rule_list' %}">Comissões</a>
                     {% if user.role == 'gestor' or user.role == 'recepcionista' %}
