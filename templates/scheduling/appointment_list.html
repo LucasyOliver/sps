@@ -36,13 +36,16 @@
     {% if available_slots %}
         <div style="margin: 12px 0;">
             <strong>Horários livres sugeridos ({{ reference_date|date:'d/m/Y' }} — base 30 min):</strong>
-            {% for slot in available_slots %}
-                <span>[{{ slot|date:'H:i' }}]</span>
-            {% endfor %}
+            <div class="sps-slot-grid">
+                {% for slot in available_slots %}
+                    <span class="sps-slot-pill">{{ slot|date:'H:i' }}</span>
+                {% endfor %}
+            </div>
         </div>
     {% endif %}
 
-    <table border="1" cellpadding="6" cellspacing="0">
+    <div class="sps-table-wrap">
+    <table>
         <thead>
             <tr>
                 <th>Início — Fim</th>
@@ -68,7 +71,7 @@
                     </td>
                     <td>{{ appt.total_duration_minutes }} min</td>
                     <td>R$ {{ appt.total_estimated_amount }}</td>
-                    <td>{{ appt.get_status_display }}</td>
+                    <td><span class="sps-badge sps-badge-{{ appt.status }}">{{ appt.get_status_display }}</span></td>
                     <td>
                         <a href="{% url 'scheduling:appointment_detail' appt.pk %}">Detalhes / Status</a> |
                         <a href="{% url 'scheduling:appointment_reschedule' appt.pk %}">Remarcar</a>
@@ -81,5 +84,6 @@
             {% endfor %}
         </tbody>
     </table>
+    </div>
 </section>
 {% endblock %}

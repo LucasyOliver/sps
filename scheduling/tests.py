@@ -1,4 +1,4 @@
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timedelta
 from decimal import Decimal
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
@@ -467,3 +467,207 @@ class ProfessionalScheduleAndBlockTests(TestCase):
         self.assertIn('client', cross_form.errors)
         self.assertIn('professional', cross_form.errors)
         self.assertIn('services', cross_form.errors)
+
+    def test_public_booking_creates_client_multi_service_appointment_and_reuses_client(self):
+        """
+        S05-T02 / RF-006: Portal público (/s/<slug>/) calcula horários livres reais para
+        múltiplos serviços, cria/reutiliza Client isolado no salão e redireciona para o token público.
+        """
+        booking_url = reverse(
+            'public_booking:salon_booking',
+            kwargs={'salon_slug': self.salon_a.slug},
+        )
+        get_resp = self.client.get(
+            f'{booking_url}?professional={self.prof_a2.pk}&date=2026-11-16'
+            f'&services={self.srv_30m.pk}&services={self.srv_45m.pk}'
+        )
+        self.assertEqual(get_resp.status_code, 200)
+        self.assertContains(get_resp, 'sps-design-system.css')
+        self.assertContains(get_resp, 'Duração total: 75 min')
+        self.assertContains(get_resp, '09:00')
+
+        post_resp = self.client.post(
+            booking_url,
+            data={
+                'services': [self.srv_30m.pk, self.srv_45m.pk],
+                'professional': self.prof_a2.pk,
+                'start_at': '2026-11-16T09:00',
+                'client_full_name': 'Fernanda Lima',
+                'client_phone': '(11) 98888-7777',
+                'client_email': 'fernanda@cliente.com.br',
+                'client_cpf_cnpj': '123.456.789-01',
+                'notes': 'Primeira visita pelo portal público',
+            },
+        )
+        self.assertEqual(post_resp.status_code, 302)
+
+        created_client = Client.objects.for_salon(self.salon_a).get(phone='11988887777')
+        self.assertEqual(created_client.full_name, 'Fernanda Lima')
+        self.assertEqual(created_client.cpf_cnpj, '12345678901')
+
+        appt = Appointment.objects.for_salon(self.salon_a).get(client=created_client)
+        self.assertEqual(appt.total_duration_minutes, 75)
+        self.assertEqual(appt.total_estimated_amount, Decimal('120.00'))
+        self.assertEqual(
+            post_resp['Location'],
+            reverse(
+                'public_booking:appointment_detail',
+                kwargs={
+                    'salon_slug': self.salon_a.slug,
+                    'public_token': appt.public_token,
+                },
+            ),
+        )
+
+        # Novo agendamento público com o mesmo telefone reutiliza o registro Client sem erro de duplicidade
+        second_resp = self.client.post(
+            booking_url,
+            data={
+                'services': [self.srv_30m.pk],
+                'professional': self.prof_a2.pk,
+                'start_at': '2026-11-16T10:30',
+                'client_full_name': 'Fernanda Lima Atualizada',
+                'client_phone': '11988887777',
+            },
+        )
+        self.assertEqual(second_resp.status_code, 302)
+        self.assertEqual(
+            Client.objects.for_salon(self.salon_a).filter(phone='11988887777').count(),
+            1,
+        )
+
+    def test_public_booking_blocks_conflict_with_internal_agenda(self):
+        """
+        S05-T04 / RF-006: Agendamento público é bloqueado se colidir com agendamento
+        já existente na agenda interna do salão.
+        """
+        tz = timezone.get_current_timezone()
+        SchedulingService.create_appointment(
+            salon=self.salon_a,
+            client=self.client_a,
+            professional=self.prof_a2,
+            start_at=timezone.make_aware(datetime(2026, 11, 16, 14, 0), tz),
+            services=[self.srv_30m, self.srv_45m],
+            created_by=self.recep_a,
+        )
+
+        booking_url = reverse(
+            'public_booking:salon_booking',
+            kwargs={'salon_slug': self.salon_a.slug},
+        )
+        conflict_resp = self.client.post(
+            booking_url,
+            data={
+                'services': [self.srv_30m.pk],
+                'professional': self.prof_a2.pk,
+                'start_at': '2026-11-16T14:30',
+                'client_full_name': 'Cliente Concorrente',
+                'client_phone': '11966665555',
+            },
+        )
+        self.assertEqual(conflict_resp.status_code, 200)
+        self.assertContains(conflict_resp, 'Conflito de horário')
+        self.assertEqual(Appointment.objects.for_salon(self.salon_a).count(), 1)
+
+    def test_public_cancellation_deadline_enforcement(self):
+        """
+        S05-T03 / S05-T04 / RF-006 Critério de aceite:
+        Dado um salão com antecedência mínima de cancelamento de 3 horas e um agendamento
+        às 16:00, quando o cliente tentar cancelar às 14:00 (faltando 2h), a operação é
+        negada e o agendamento permanece ativo; quando cancelar dentro do prazo (<= 13:00),
+        o cancelamento é efetivado.
+        """
+        tz = timezone.get_current_timezone()
+        self.salon_a.cancellation_min_hours = 3
+        self.salon_a.save(update_fields=['cancellation_min_hours'])
+
+        appt_16h = SchedulingService.create_appointment(
+            salon=self.salon_a,
+            client=self.client_a,
+            professional=self.prof_a2,
+            start_at=timezone.make_aware(datetime(2026, 11, 16, 16, 0), tz),
+            services=[self.srv_30m],
+        )
+
+        # Tentativa às 14:00 (apenas 2h antes das 16:00, menor que 3h exigidas) -> negada
+        attempt_at_14h = timezone.make_aware(datetime(2026, 11, 16, 14, 0), tz)
+        with self.assertRaises(ValidationError):
+            SchedulingService.cancel_public_appointment(
+                salon=self.salon_a,
+                appointment=appt_16h,
+                cancellation_reason='Imprevisto de última hora',
+                now=attempt_at_14h,
+            )
+        appt_16h.refresh_from_db()
+        self.assertEqual(appt_16h.status, AppointmentStatusChoices.SCHEDULED)
+
+        # Tentativa às 12:30 (3h30 antes das 16:00, dentro do prazo de 3h) -> permitida
+        attempt_at_12h30 = timezone.make_aware(datetime(2026, 11, 16, 12, 30), tz)
+        SchedulingService.cancel_public_appointment(
+            salon=self.salon_a,
+            appointment=appt_16h,
+            cancellation_reason='Reunião antecipada',
+            now=attempt_at_12h30,
+        )
+        appt_16h.refresh_from_db()
+        self.assertEqual(appt_16h.status, AppointmentStatusChoices.CANCELLED)
+        self.assertEqual(appt_16h.cancellation_reason, 'Reunião antecipada')
+
+        # Teste ponta a ponta via View HTTP com agendamento a 1 hora do início (fora do prazo de 3h)
+        near_start = timezone.now() + timedelta(hours=1)
+        appt_near = Appointment.objects.create(
+            salon=self.salon_a,
+            client=self.client_a,
+            professional=self.prof_a1,
+            start_at=near_start,
+            end_at=near_start + timedelta(minutes=30),
+            total_duration_minutes=30,
+            total_estimated_amount=Decimal('50.00'),
+        )
+        detail_url = reverse(
+            'public_booking:appointment_detail',
+            kwargs={
+                'salon_slug': self.salon_a.slug,
+                'public_token': appt_near.public_token,
+            },
+        )
+        late_post = self.client.post(
+            detail_url,
+            data={'cancellation_reason': 'Tentativa fora do prazo via HTTP'},
+        )
+        self.assertEqual(late_post.status_code, 200)
+        self.assertContains(late_post, 'O prazo para cancelamento online encerrou')
+        appt_near.refresh_from_db()
+        self.assertEqual(appt_near.status, AppointmentStatusChoices.SCHEDULED)
+
+    def test_public_routes_enforce_tenant_isolation_and_active_salon(self):
+        """
+        SEC-B / RNF-001: Token público do Salão A não pode ser consultado nem cancelado
+        pela rota do Salão B, e salão inativo retorna 404.
+        """
+        tz = timezone.get_current_timezone()
+        appt_a = SchedulingService.create_appointment(
+            salon=self.salon_a,
+            client=self.client_a,
+            professional=self.prof_a2,
+            start_at=timezone.make_aware(datetime(2026, 11, 16, 11, 0), tz),
+            services=[self.srv_30m],
+        )
+
+        cross_salon_url = reverse(
+            'public_booking:appointment_detail',
+            kwargs={
+                'salon_slug': self.salon_b.slug,
+                'public_token': appt_a.public_token,
+            },
+        )
+        self.assertEqual(self.client.get(cross_salon_url).status_code, 404)
+        self.assertEqual(self.client.post(cross_salon_url).status_code, 404)
+
+        self.salon_a.is_active = False
+        self.salon_a.save(update_fields=['is_active'])
+        booking_a_url = reverse(
+            'public_booking:salon_booking',
+            kwargs={'salon_slug': self.salon_a.slug},
+        )
+        self.assertEqual(self.client.get(booking_a_url).status_code, 404)

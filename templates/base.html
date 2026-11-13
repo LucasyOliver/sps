@@ -1,52 +1,165 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}SPS — Sistema Para Salões{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/sps-design-system.css' %}">
+    {% block extra_head %}{% endblock %}
 </head>
 <body>
-    <header>
-        <h1>SPS — Sistema Para Salões</h1>
+    <div class="sps-shell">
         {% if user.is_authenticated %}
-            <nav>
-                <a href="{% url 'base:home' %}">Início</a>
-                {% if user.salon %}
-                    | <a href="{% url 'scheduling:appointment_list' %}">Agenda</a>
-                    | <a href="{% url 'catalog:service_list' %}">Serviços</a>
-                    | <a href="{% url 'catalog:commission_rule_list' %}">Comissões</a>
-                    {% if user.role == 'gestor' or user.role == 'recepcionista' %}
-                        | <a href="{% url 'clients:client_list' %}">Clientes</a>
+        <aside class="sps-sidebar">
+            <div>
+                <div class="sps-sidebar-brand">
+                    <span class="sps-brand-badge">S</span>
+                    <a href="{% url 'base:home' %}" class="sps-brand-title">SPS Salões</a>
+                </div>
+                <nav class="sps-nav" aria-label="Navegação Principal">
+                    <div class="sps-nav-section-label">Operação</div>
+                    <a href="{% url 'base:home' %}" class="sps-nav-link {% if request.resolver_match.url_name == 'home' %}is-active{% endif %}">
+                        <svg class="sps-nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                        </svg>
+                        <span>Início</span>
+                    </a>
+                    {% if user.salon %}
+                        <a href="{% url 'scheduling:appointment_list' %}" class="sps-nav-link {% if 'appointment' in request.resolver_match.url_name %}is-active{% endif %}">
+                            <svg class="sps-nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span>Agenda</span>
+                        </a>
+                        {% if user.role == 'gestor' or user.role == 'recepcionista' %}
+                            <a href="{% url 'clients:client_list' %}" class="sps-nav-link {% if request.resolver_match.namespace == 'clients' %}is-active{% endif %}">
+                                <svg class="sps-nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                                </svg>
+                                <span>Clientes</span>
+                            </a>
+                        {% endif %}
+                        <a href="{% url 'catalog:service_list' %}" class="sps-nav-link {% if request.resolver_match.url_name == 'service_list' %}is-active{% endif %}">
+                            <svg class="sps-nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                            </svg>
+                            <span>Serviços</span>
+                        </a>
+                        <a href="{% url 'catalog:commission_rule_list' %}" class="sps-nav-link {% if 'commission' in request.resolver_match.url_name %}is-active{% endif %}">
+                            <svg class="sps-nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"></path>
+                            </svg>
+                            <span>Comissões</span>
+                        </a>
+
+                        <div class="sps-nav-section-label">Expediente e Escalas</div>
+                        <a href="{% url 'scheduling:professional_schedules' %}" class="sps-nav-link {% if 'professional_schedule' in request.resolver_match.url_name %}is-active{% endif %}">
+                            <span>Expediente Profissionais</span>
+                        </a>
+                        <a href="{% url 'scheduling:schedule_blocks' %}" class="sps-nav-link {% if 'schedule_block' in request.resolver_match.url_name %}is-active{% endif %}">
+                            <span>Bloqueios de Agenda</span>
+                        </a>
+                        <a href="{% url 'salons:business_hours' %}" class="sps-nav-link {% if request.resolver_match.url_name == 'business_hours' %}is-active{% endif %}">
+                            <span>Expediente do Salão</span>
+                        </a>
+                        <a href="{% url 'salons:holidays' %}" class="sps-nav-link {% if request.resolver_match.url_name == 'holidays' %}is-active{% endif %}">
+                            <span>Feriados</span>
+                        </a>
+
+                        {% if user.role == 'gestor' %}
+                            <div class="sps-nav-section-label">Administração do Salão</div>
+                            <a href="{% url 'accounts:team_list' %}" class="sps-nav-link {% if 'team' in request.resolver_match.url_name %}is-active{% endif %}">
+                                <span>Equipe</span>
+                            </a>
+                            <a href="{% url 'salons:settings' %}" class="sps-nav-link {% if request.resolver_match.url_name == 'settings' %}is-active{% endif %}">
+                                <svg class="sps-nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                                <span>Configurações e Fiscal</span>
+                            </a>
+                        {% endif %}
                     {% endif %}
-                    | <a href="{% url 'salons:business_hours' %}">Expediente do Salão</a>
-                    | <a href="{% url 'salons:holidays' %}">Feriados</a>
-                    | <a href="{% url 'scheduling:professional_schedules' %}">Expediente Profissionais</a>
-                    | <a href="{% url 'scheduling:schedule_blocks' %}">Bloqueios de Agenda</a>
-                    {% if user.role == 'gestor' %}
-                        | <a href="{% url 'salons:settings' %}">Configurações e Fiscal</a>
-                        | <a href="{% url 'accounts:team_list' %}">Equipe</a>
-                    {% endif %}
-                {% endif %}
-                | <span>Olá, {{ user.full_name }} ({{ user.get_role_display }})</span>
-                {% if user.salon %}
-                    <span>| Salão: <strong>{{ user.salon.trade_name }}</strong></span>
-                {% endif %}
-                <form action="{% url 'accounts:logout' %}" method="post" style="display:inline;">
+                </nav>
+            </div>
+            <div class="sps-sidebar-footer">
+                <div class="sps-user-summary">
+                    <span class="sps-avatar">{{ user.full_name|slice:":1"|upper }}</span>
+                    <div>
+                        <div style="font-weight: 600; font-size: 0.85rem; color: var(--sps-text-secondary);">Olá, {{ user.full_name }} ({{ user.get_role_display }})</div>
+                        <div style="font-size: 0.75rem; color: var(--sps-text-muted);">
+                            {% if user.salon %}Salão: <strong>{{ user.salon.trade_name }}</strong>{% else %}Global SaaS{% endif %}
+                        </div>
+                    </div>
+                </div>
+                <form action="{% url 'accounts:logout' %}" method="post" style="margin: 0;">
                     {% csrf_token %}
-                    <button type="submit">Sair</button>
+                    <button type="submit" class="btn-secondary" style="width: 100%;">Sair</button>
                 </form>
+            </div>
+        </aside>
+        {% endif %}
+
+        <div class="sps-main-wrapper">
+            <header class="sps-topbar">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    {% if not user.is_authenticated %}
+                        <span class="sps-brand-badge">S</span>
+                    {% endif %}
+                    <h1 class="sps-topbar-title" style="margin: 0;">
+                        SPS — Sistema Para Salões
+                        {% if user.is_authenticated and user.salon %}
+                            <span style="font-weight: 400; color: var(--sps-text-muted);">• {{ user.salon.trade_name }}</span>
+                        {% endif %}
+                    </h1>
+                </div>
+                {% if user.is_authenticated and user.salon %}
+                <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                    <a href="{% url 'public_booking:salon_booking' salon_slug=user.salon.slug %}" class="btn-secondary" target="_blank" rel="noopener">
+                        Portal Público (/s/{{ user.salon.slug }}/)
+                    </a>
+                    <a href="{% url 'scheduling:appointment_create' %}" class="btn-primary">
+                        + Novo Agendamento
+                    </a>
+                </div>
+                {% endif %}
+            </header>
+
+            {% if user.is_authenticated %}
+            <nav class="sps-mobile-nav" aria-label="Navegação Mobile">
+                <a href="{% url 'base:home' %}" class="sps-nav-link">Início</a>
+                {% if user.salon %}
+                    <a href="{% url 'scheduling:appointment_list' %}" class="sps-nav-link">Agenda</a>
+                    {% if user.role == 'gestor' or user.role == 'recepcionista' %}
+                        <a href="{% url 'clients:client_list' %}" class="sps-nav-link">Clientes</a>
+                    {% endif %}
+                    <a href="{% url 'catalog:service_list' %}" class="sps-nav-link">Serviços</a>
+                    <a href="{% url 'catalog:commission_rule_list' %}" class="sps-nav-link">Comissões</a>
+                    <a href="{% url 'scheduling:schedule_blocks' %}" class="sps-nav-link">Bloqueios</a>
+                    {% if user.role == 'gestor' %}
+                        <a href="{% url 'accounts:team_list' %}" class="sps-nav-link">Equipe</a>
+                        <a href="{% url 'salons:settings' %}" class="sps-nav-link">Configurações</a>
+                    {% endif %}
+                {% endif %}
             </nav>
-        {% endif %}
-    </header>
-    <main>
-        {% if messages %}
-            <ul>
-                {% for message in messages %}
-                    <li>{{ message }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-        {% block content %}{% endblock %}
-    </main>
+            {% endif %}
+
+            <main class="sps-content" {% if not user.is_authenticated %}style="max-width: 30rem;"{% endif %}>
+                {% if messages %}
+                    <div aria-live="polite">
+                        {% for message in messages %}
+                            <div class="sps-alert {% if 'error' in message.tags %}sps-alert-error{% elif 'warning' in message.tags %}sps-alert-warning{% else %}sps-alert-success{% endif %}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <div class="sps-card">
+                    {% block content %}{% endblock %}
+                </div>
+            </main>
+        </div>
+    </div>
 </body>
 </html>

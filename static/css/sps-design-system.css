@@ -1,0 +1,621 @@
+/* ==========================================================================
+   SPS (Sistema Para Salões) — Design System Oficial (Sprint 05)
+   Fonte de Tokens: sps/design_system/refs/design-system.html
+   Catálogo Documentado: sps/docs/01_planejamento/catalogo_design_system.md
+   ========================================================================== */
+
+:root {
+  --sps-bg-app: #f9fafb;           /* gray-50 */
+  --sps-bg-surface: #ffffff;       /* white */
+  --sps-bg-subtle: #f3f4f6;        /* gray-100 */
+  --sps-bg-accent-subtle: #f5f3ff; /* violet-50 */
+  --sps-bg-accent-pill: #ede9fe;   /* violet-100 */
+  --sps-primary: #7c3aed;          /* violet-600 */
+  --sps-primary-hover: #6d28d9;    /* violet-700 */
+  --sps-primary-deep: #4c1d95;     /* violet-900 */
+  --sps-text-primary: #111827;     /* gray-900 */
+  --sps-text-heading: #1f2937;     /* gray-800 */
+  --sps-text-secondary: #374151;   /* gray-700 */
+  --sps-text-muted: #6b7280;       /* gray-500 */
+  --sps-border: #e5e7eb;           /* gray-200 */
+  --sps-border-input: #d1d5db;     /* gray-300 */
+  --sps-success-bg: #dcfce7;       /* green-100 */
+  --sps-success-text: #166534;     /* green-800 */
+  --sps-warning-bg: #fef9c3;       /* yellow-100 */
+  --sps-warning-text: #854d0e;     /* yellow-800 */
+  --sps-danger-bg: #fee2e2;        /* red-100 */
+  --sps-danger-text: #991b1b;      /* red-800 */
+  --sps-danger: #dc2626;           /* red-600 */
+  --sps-danger-hover: #b91c1c;     /* red-700 */
+  --sps-radius-md: 0.375rem;       /* 6px */
+  --sps-radius-lg: 0.5rem;         /* 8px */
+  --sps-shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  --sps-font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --sps-font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--sps-bg-app);
+  color: var(--sps-text-primary);
+  font-family: var(--sps-font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ==========================================================================
+   00. Application Shell (Desktop Sidebar + Header + Main & Mobile Fallback)
+   ========================================================================== */
+
+.sps-shell {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--sps-bg-app);
+}
+
+.sps-sidebar {
+  width: 16rem; /* w-64 (256px) */
+  flex-shrink: 0;
+  background-color: var(--sps-bg-surface);
+  border-right: 1px solid var(--sps-border);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.sps-sidebar-brand {
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.sps-brand-badge {
+  width: 2rem;
+  height: 2rem;
+  background-color: var(--sps-primary);
+  border-radius: var(--sps-radius-md);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+
+.sps-brand-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--sps-text-heading);
+  text-decoration: none;
+}
+
+.sps-nav {
+  padding: 0 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.sps-nav-section-label {
+  padding: 0.75rem 0.75rem 0.25rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--sps-text-muted);
+}
+
+.sps-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--sps-text-secondary);
+  border-radius: var(--sps-radius-md);
+  text-decoration: none;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.sps-nav-link:hover {
+  background-color: var(--sps-bg-subtle);
+  color: var(--sps-text-primary);
+}
+
+.sps-nav-link.is-active {
+  background-color: var(--sps-bg-accent-subtle);
+  color: var(--sps-primary-hover);
+  font-weight: 600;
+}
+
+.sps-nav-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+}
+
+.sps-sidebar-footer {
+  padding: 1.25rem 1.5rem;
+  margin-top: 1.5rem;
+  border-top: 1px solid var(--sps-border);
+}
+
+.sps-user-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.sps-avatar {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  background-color: var(--sps-bg-accent-pill);
+  color: var(--sps-primary-hover);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+
+.sps-main-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.sps-topbar {
+  background-color: var(--sps-bg-surface);
+  border-bottom: 1px solid var(--sps-border);
+  padding: 0.875rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.sps-topbar-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--sps-text-primary);
+}
+
+.sps-mobile-nav {
+  display: none;
+  background-color: var(--sps-bg-surface);
+  border-bottom: 1px solid var(--sps-border);
+  padding: 0.5rem 1rem;
+  overflow-x: auto;
+  white-space: nowrap;
+  gap: 0.5rem;
+}
+
+.sps-content {
+  flex: 1;
+  padding: 1.5rem;
+  max-width: 80rem;
+  width: 100%;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .sps-sidebar {
+    display: none;
+  }
+  .sps-mobile-nav {
+    display: flex;
+  }
+  .sps-content {
+    padding: 1rem;
+  }
+  .sps-topbar {
+    padding: 0.75rem 1rem;
+  }
+}
+
+/* ==========================================================================
+   01. Tipografia, Links e Hierarquia
+   ========================================================================== */
+
+h1, h2, h3, h4 {
+  color: var(--sps-text-primary);
+  margin-top: 0;
+}
+
+h1 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.75rem;
+  margin-bottom: 1rem;
+}
+
+h2 {
+  font-size: 1.125rem;
+  font-weight: 500;
+  line-height: 1.75rem;
+  margin-bottom: 0.875rem;
+}
+
+h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+a {
+  color: var(--sps-primary);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--sps-primary-hover);
+}
+
+/* ==========================================================================
+   02. Cartões, Containers e Grid Responsivo
+   ========================================================================== */
+
+.sps-card {
+  background-color: var(--sps-bg-surface);
+  border-radius: var(--sps-radius-lg);
+  box-shadow: var(--sps-shadow-card);
+  border: 1px solid var(--sps-border);
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.sps-grid-kpi {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.sps-kpi-card {
+  background-color: var(--sps-bg-surface);
+  border-radius: var(--sps-radius-lg);
+  box-shadow: var(--sps-shadow-card);
+  border: 1px solid var(--sps-border);
+  padding: 1.25rem 1.5rem;
+}
+
+.sps-kpi-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--sps-text-muted);
+  margin-bottom: 0.35rem;
+}
+
+.sps-kpi-value {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--sps-text-primary);
+  line-height: 1.2;
+}
+
+.sps-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+@media (max-width: 768px) {
+  .sps-grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================================================
+   03. Tabelas de Dados (Seção 05 do Design System)
+   ========================================================================== */
+
+.sps-table-wrap {
+  background-color: var(--sps-bg-surface);
+  border-radius: var(--sps-radius-lg);
+  box-shadow: var(--sps-shadow-card);
+  border: 1px solid var(--sps-border);
+  overflow-x: auto;
+  margin-bottom: 1.25rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--sps-bg-surface);
+}
+
+thead {
+  background-color: var(--sps-bg-app);
+  border-bottom: 1px solid var(--sps-border);
+}
+
+th {
+  padding: 0.75rem 1.25rem;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--sps-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+td {
+  padding: 0.875rem 1.25rem;
+  font-size: 0.875rem;
+  color: var(--sps-text-primary);
+  border-bottom: 1px solid var(--sps-border);
+  vertical-align: middle;
+}
+
+tbody tr:hover {
+  background-color: #fcfcfd;
+}
+
+/* ==========================================================================
+   04. Botões, Pílulas de Status e Alertas (Seção 06 + Extensões)
+   ========================================================================== */
+
+button,
+.btn-primary,
+.btn-secondary,
+.btn-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--sps-radius-md);
+  font-family: var(--sps-font-sans);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  text-decoration: none;
+}
+
+button[type="submit"],
+.btn-primary {
+  background-color: var(--sps-primary);
+  color: #ffffff;
+}
+
+button[type="submit"]:hover,
+.btn-primary:hover {
+  background-color: var(--sps-primary-hover);
+  color: #ffffff;
+}
+
+.btn-secondary {
+  background-color: var(--sps-bg-surface);
+  border-color: var(--sps-border-input);
+  color: var(--sps-text-secondary);
+}
+
+.btn-secondary:hover {
+  background-color: var(--sps-bg-app);
+  color: var(--sps-text-primary);
+}
+
+.btn-danger {
+  background-color: var(--sps-danger);
+  color: #ffffff;
+}
+
+.btn-danger:hover {
+  background-color: var(--sps-danger-hover);
+  color: #ffffff;
+}
+
+.sps-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.625rem;
+  font-size: 0.75rem;
+  line-height: 1.25rem;
+  font-weight: 600;
+  border-radius: 9999px;
+}
+
+.sps-badge-success,
+.sps-badge-confirmado,
+.sps-badge-concluido {
+  background-color: var(--sps-success-bg);
+  color: var(--sps-success-text);
+}
+
+.sps-badge-warning,
+.sps-badge-agendado {
+  background-color: var(--sps-warning-bg);
+  color: var(--sps-warning-text);
+}
+
+.sps-badge-accent,
+.sps-badge-em_atendimento {
+  background-color: var(--sps-bg-accent-pill);
+  color: #5b21b6;
+}
+
+.sps-badge-danger,
+.sps-badge-cancelado,
+.sps-badge-nao_compareceu {
+  background-color: var(--sps-danger-bg);
+  color: var(--sps-danger-text);
+}
+
+.sps-alert {
+  padding: 0.875rem 1rem;
+  border-radius: var(--sps-radius-md);
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  border: 1px solid var(--sps-border);
+  background-color: var(--sps-bg-surface);
+}
+
+.sps-alert-success {
+  background-color: var(--sps-success-bg);
+  color: var(--sps-success-text);
+  border-color: #bbf7d0;
+}
+
+.sps-alert-warning {
+  background-color: var(--sps-warning-bg);
+  color: var(--sps-warning-text);
+  border-color: #fef08a;
+}
+
+.sps-alert-error {
+  background-color: var(--sps-danger-bg);
+  color: var(--sps-danger-text);
+  border-color: #fecaca;
+}
+
+/* ==========================================================================
+   05. Formulários, Seletores de Serviço e Horários (Extensão Proposta)
+   ========================================================================== */
+
+form p {
+  margin-bottom: 1rem;
+}
+
+label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--sps-text-secondary);
+  margin-bottom: 0.35rem;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"],
+input[type="tel"],
+select,
+textarea {
+  width: 100%;
+  max-width: 100%;
+  padding: 0.5rem 0.75rem;
+  font-family: var(--sps-font-sans);
+  font-size: 0.875rem;
+  color: var(--sps-text-primary);
+  background-color: var(--sps-bg-surface);
+  border: 1px solid var(--sps-border-input);
+  border-radius: var(--sps-radius-md);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--sps-primary);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.18);
+}
+
+.errorlist {
+  list-style: none;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background-color: var(--sps-danger-bg);
+  color: var(--sps-danger-text);
+  border-radius: var(--sps-radius-md);
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.helptext {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--sps-text-muted);
+}
+
+/* Seletores públicos de serviços e slots */
+.sps-service-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.sps-service-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  padding: 0.875rem;
+  border: 1px solid var(--sps-border);
+  border-radius: var(--sps-radius-md);
+  background-color: var(--sps-bg-surface);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.sps-service-option:hover {
+  border-color: var(--sps-primary);
+  background-color: var(--sps-bg-accent-subtle);
+}
+
+.sps-slot-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.75rem 0 1rem;
+}
+
+.sps-slot-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 0.75rem;
+  font-family: var(--sps-font-mono);
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: var(--sps-radius-md);
+  border: 1px solid #ddd6fe;
+  background-color: var(--sps-bg-accent-subtle);
+  color: var(--sps-primary-hover);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.sps-slot-pill:hover,
+.sps-slot-pill.is-selected {
+  background-color: var(--sps-primary);
+  border-color: var(--sps-primary);
+  color: #ffffff;
+}
+
+/* Portal Público (/s/<slug>/) */
+.sps-public-header {
+  background-color: var(--sps-bg-surface);
+  border-bottom: 1px solid var(--sps-border);
+  padding: 1rem 1.5rem;
+}
+
+.sps-public-container {
+  max-width: 56rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+}
+
+.sps-mono {
+  font-family: var(--sps-font-mono);
+}

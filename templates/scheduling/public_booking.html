@@ -1,0 +1,97 @@
+{% extends 'public_base.html' %}
+
+{% block title %}Agendar Atendimento — {{ salon.trade_name }} | SPS{% endblock %}
+
+{% block content %}
+<section class="sps-card">
+    <h1>Agende seu horário em {{ salon.trade_name }}</h1>
+    <p style="color: var(--sps-text-muted); margin-bottom: 1.25rem;">
+        Selecione um ou mais serviços, consulte os horários livres reais do profissional e confirme seu agendamento online.
+    </p>
+
+    <form method="get" style="background-color: var(--sps-bg-app); padding: 1rem; border-radius: var(--sps-radius-md); border: 1px solid var(--sps-border); margin-bottom: 1.5rem;">
+        <h2 style="font-size: 0.95rem; margin-bottom: 0.75rem;">1. Simular Horários Disponíveis</h2>
+        <div class="sps-grid-2">
+            <div>
+                <label for="id_filter_prof">Profissional</label>
+                <select name="professional" id="id_filter_prof">
+                    {% for prof in professionals %}
+                        <option value="{{ prof.pk }}" {% if selected_professional and selected_professional.pk == prof.pk %}selected{% endif %}>
+                            {{ prof.full_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label for="id_filter_date">Data desejada</label>
+                <input type="date" name="date" id="id_filter_date" value="{{ target_date|date:'Y-m-d' }}">
+            </div>
+        </div>
+        <div style="margin-top: 0.85rem;">
+            <label>Serviços para cálculo de tempo total</label>
+            <div class="sps-service-grid">
+                {% for srv in services_catalog %}
+                    <label class="sps-service-option" style="margin-bottom: 0;">
+                        <input type="checkbox" name="services" value="{{ srv.pk }}" {% if srv.pk in selected_service_ids %}checked{% endif %} style="width: auto; margin-top: 0.2rem;">
+                        <div>
+                            <div style="font-weight: 600; color: var(--sps-text-primary);">{{ srv.name }}</div>
+                            <div style="font-size: 0.75rem; color: var(--sps-text-muted);">
+                                {{ srv.duration_minutes }} min • R$ {{ srv.base_price }}
+                            </div>
+                        </div>
+                    </label>
+                {% empty %}
+                    <p style="color: var(--sps-text-muted);">Nenhum serviço ativo cadastrado neste salão.</p>
+                {% endfor %}
+            </div>
+        </div>
+        <button type="submit" class="btn-secondary">Consultar Horários Livres</button>
+    </form>
+
+    {% if selected_professional %}
+        <div style="margin-bottom: 1.5rem;">
+            <h2 style="font-size: 0.95rem; margin-bottom: 0.5rem;">
+                Horários livres para <strong>{{ selected_professional.full_name }}</strong> em {{ target_date|date:'d/m/Y' }}
+                {% if selected_services_duration %}
+                    <span class="sps-badge sps-badge-accent">Duração total: {{ selected_services_duration }} min • R$ {{ selected_services_amount }}</span>
+                {% endif %}
+            </h2>
+            {% if available_slots %}
+                <div class="sps-slot-grid">
+                    {% for slot in available_slots %}
+                        <a href="?professional={{ selected_professional.pk }}&date={{ target_date|date:'Y-m-d' }}{% for sid in selected_service_ids %}&services={{ sid }}{% endfor %}&slot={{ slot|date:'H:i' }}" class="sps-slot-pill">
+                            {{ slot|date:'H:i' }}
+                        </a>
+                    {% endfor %}
+                </div>
+                <span class="helptext">Clique em um horário acima para preencher automaticamente o formulário de confirmação abaixo.</span>
+            {% else %}
+                <div class="sps-alert sps-alert-warning">
+                    Nenhum horário livre compatível encontrado para esta data e combinação de serviços.
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+</section>
+
+<section class="sps-card">
+    <h2>2. Confirmar Agendamento</h2>
+    <form method="post" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+            <div class="sps-alert sps-alert-error" role="alert">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        {{ form.as_p }}
+
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-top: 1.25rem;">
+            <span style="font-size: 0.8rem; color: var(--sps-text-muted);">
+                Cancelamento online permitido com até <strong>{{ salon.cancellation_min_hours }}h</strong> de antecedência.
+            </span>
+            <button type="submit" class="btn-primary">Confirmar Agendamento</button>
+        </div>
+    </form>
+</section>
+{% endblock %}

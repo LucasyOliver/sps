@@ -80,15 +80,15 @@ modulo_pai: "prd_do_projeto.md"
 
 ## Sprint 05: Design System, Autoagendamento Público (`/s/<slug>/`) e Cancelamento
 
-- **Solicitação do usuário:** `pendente`
+- **Solicitação do usuário:** `solicitada e concluída em 2026-11-13`
 - **Requisitos atendidos:** `RF-006`, `RNF-002`, `RNF-003`
 - **Pré-condições:** `Sprint 04` concluída e pasta `sps/design_system/` fornecida pelo desenvolvedor.
 - **Tarefas da Sprint:**
-  - [ ] `S05-T01`: Inventariar `sps/design_system/`, documentar o catálogo visual em `docs/01_planejamento/catalogo_design_system.md` e aplicar tokens/componentes nos layouts base Desktop e Mobile.
-  - [ ] `S05-T02`: Implementar páginas públicas `/s/<slug_salao>/` onde o cliente seleciona múltiplos serviços, escolhe profissional e horário livre real (via `AvailabilityService`) e confirma o agendamento recebendo `public_token`.
-  - [ ] `S05-T03`: Implementar rota pública de consulta e cancelamento `/s/<slug_salao>/agendamento/<public_token>/` que valida `timezone.now() <= appointment.start_at - timedelta(hours=salon.cancellation_min_hours)`.
-  - [ ] `S05-T04`: Escrever e executar testes automatizados (`DEC-001`) de agendamento público com múltiplos serviços, bloqueio de conflito com agenda interna e negação de cancelamento fora da antecedência mínima configurada pelo salão.
-  - [ ] `S05-T05`: Revisar incremento em larguras Desktop e Mobile, registrar `evidencias_da_sprint_005.md` e entregar para ação de Git/GitHub do usuário.
+  - [x] `S05-T01`: Inventariar `sps/design_system/`, documentar o catálogo visual em `docs/01_planejamento/catalogo_design_system.md` e aplicar tokens/componentes nos layouts base Desktop e Mobile.
+  - [x] `S05-T02`: Implementar páginas públicas `/s/<slug_salao>/` onde o cliente seleciona múltiplos serviços, escolhe profissional e horário livre real (via `AvailabilityService`) e confirma o agendamento recebendo `public_token`.
+  - [x] `S05-T03`: Implementar rota pública de consulta e cancelamento `/s/<slug_salao>/agendamento/<public_token>/` que valida `timezone.now() <= appointment.start_at - timedelta(hours=salon.cancellation_min_hours)`.
+  - [x] `S05-T04`: Escrever e executar testes automatizados (`DEC-001`) de agendamento público com múltiplos serviços, bloqueio de conflito com agenda interna e negação de cancelamento fora da antecedência mínima configurada pelo salão.
+  - [x] `S05-T05`: Revisar incremento em larguras Desktop e Mobile, registrar `evidencias_da_sprint_005.md` e entregar para ação de Git/GitHub do usuário.
 
 ---
 

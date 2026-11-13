@@ -3,13 +3,13 @@
   "_versao_template": "1.0.0",
   "valores": {
     "ambiente_deploy": "VPS Ubuntu com Docker Swarm, Traefik (TLS DNS-01 Cloudflare) e Docker Secrets",
-    "arquivo_catalogo_design": null,
-    "arquivo_design_system": null,
+    "arquivo_catalogo_design": "docs/01_planejamento/catalogo_design_system.md",
+    "arquivo_design_system": "design_system/refs/design-system.html",
     "contexto_do_projeto": "Plataforma SaaS multi-tenant para gestao integrada de saloes de beleza (SPS - Sistema Para Saloes), contemplando agendamento interno e publico, catalogo de servicos, comandas, caixa, comissoes de profissionais, controle de estoque, preparacao estrutural para futura emissao de notas fiscais (NFS-e/NFC-e), relatorios PDF e assistente gerencial interno de IA.",
     "dominio_principal": null,
     "endereco_swarm": null,
     "especificacoes_tecnicas_confirmadas": "Ver docs/01_planejamento/prompt_refinado_do_projeto.md (secao <tech_specs>)",
-    "id_sprint": "Sprint 04",
+    "id_sprint": "Sprint 05",
     "modelo_llm": null,
     "modelo_tenant": "Multi-tenant compartilhado com isolamento por organizacao (Salao). Cada usuario interno pertence a um unico salao fixo (alem do Superadmin SaaS global); clientes, servicos, agenda, comandas, caixa, comissoes e estoque sao estritamente isolados por salao.",
     "nome_organizacao": "salao",
@@ -44,7 +44,7 @@
     "prompt_refinado_revisado": true,
     "prd_aprovado": true,
     "evidencia_aprovacao_prd": "Aprovado pelo desenvolvedor em 2026-11-12: 'Aprovo o PRD versao 1.0.0 do SPS e solicito a execucao exclusiva da Sprint 01.'",
-    "sprint_solicitada": "Sprint 04",
+    "sprint_solicitada": "Sprint 05",
     "git_github_exclusivos_do_usuario": true,
     "deploy_executado": false
   }

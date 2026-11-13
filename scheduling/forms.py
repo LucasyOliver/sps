@@ -149,3 +149,68 @@ class AppointmentStatusTransitionForm(forms.Form):
         max_length=200,
         required=False,
     )
+
+
+class PublicBookingForm(forms.Form):
+    services = forms.ModelMultipleChoiceField(
+        label='Serviços desejados (selecione 1 ou mais)',
+        queryset=Service.objects.none(),
+        widget=forms.CheckboxSelectMultiple(),
+    )
+    professional = forms.ModelChoiceField(
+        label='Profissional',
+        queryset=User.objects.none(),
+    )
+    start_at = forms.DateTimeField(
+        label='Data e horário de início',
+        widget=forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+    )
+    client_full_name = forms.CharField(
+        label='Seu nome completo',
+        max_length=160,
+    )
+    client_phone = forms.CharField(
+        label='Telefone / WhatsApp (com DDD)',
+        max_length=20,
+        help_text='Ex.: (11) 98888-7777',
+    )
+    client_email = forms.EmailField(
+        label='E-mail (opcional)',
+        required=False,
+    )
+    client_cpf_cnpj = forms.CharField(
+        label='CPF ou CNPJ para futura nota fiscal (opcional)',
+        max_length=18,
+        required=False,
+    )
+    notes = forms.CharField(
+        label='Observações / Preferências (opcional)',
+        required=False,
+        widget=forms.Textarea(attrs={'rows': 2}),
+    )
+
+    def __init__(self, *args, salon=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.salon = salon
+        if self.salon is not None:
+            self.fields['services'].queryset = (
+                Service.objects.for_salon(self.salon)
+                .filter(is_active=True)
+                .order_by('name')
+            )
+            self.fields['professional'].queryset = (
+                User.objects.filter(
+                    salon=self.salon,
+                    is_active=True,
+                    role__in=[UserRoleChoices.PROFISSIONAL, UserRoleChoices.GESTOR],
+                )
+                .order_by('full_name')
+            )
+
+
+class PublicAppointmentCancelForm(forms.Form):
+    cancellation_reason = forms.CharField(
+        label='Motivo do cancelamento (opcional)',
+        max_length=200,
+        required=False,
+    )

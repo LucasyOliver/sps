@@ -6,15 +6,40 @@
 <section>
     <h2>Painel Operacional</h2>
     <p>Bem-vindo ao <strong>SPS (Sistema Para Salões)</strong>.</p>
-    <ul>
-        <li><strong>Usuário autenticado:</strong> {{ user.email }}</li>
-        <li><strong>Perfil:</strong> {{ user.get_role_display }}</li>
+
+    <div class="sps-grid-kpi">
+        <div class="sps-kpi-card">
+            <div class="sps-kpi-label">Usuário autenticado</div>
+            <div style="font-size: 1rem; font-weight: 600;">{{ user.email }}</div>
+            <div style="margin-top: 0.35rem;">
+                <span class="sps-badge sps-badge-accent">{{ user.get_role_display }}</span>
+            </div>
+        </div>
         {% if user.salon %}
-            <li><strong>Salão vinculado:</strong> {{ user.salon.trade_name }} ({{ user.salon.slug }})</li>
-            <li><strong>Regime tributário configurado:</strong> {{ user.salon.get_tax_regime_display }}</li>
+        <div class="sps-kpi-card">
+            <div class="sps-kpi-label">Salão vinculado</div>
+            <div style="font-size: 1.1rem; font-weight: 600;">{{ user.salon.trade_name }} ({{ user.salon.slug }})</div>
+            <div style="font-size: 0.8rem; color: var(--sps-text-muted); margin-top: 0.25rem;">
+                Regime tributário configurado: {{ user.salon.get_tax_regime_display }}
+            </div>
+        </div>
+        <div class="sps-kpi-card">
+            <div class="sps-kpi-label">Link de Autoagendamento Público</div>
+            <div style="margin-top: 0.35rem;">
+                <a href="{% url 'public_booking:salon_booking' salon_slug=user.salon.slug %}" class="btn-secondary">
+                    /s/{{ user.salon.slug }}/
+                </a>
+            </div>
+            <div style="font-size: 0.75rem; color: var(--sps-text-muted); margin-top: 0.35rem;">
+                Cancelamento online até {{ user.salon.cancellation_min_hours }}h antes
+            </div>
+        </div>
         {% else %}
-            <li><strong>Escopo:</strong> Administração Global da Plataforma SaaS</li>
+        <div class="sps-kpi-card">
+            <div class="sps-kpi-label">Escopo</div>
+            <div style="font-size: 1rem; font-weight: 600;">Administração Global da Plataforma SaaS</div>
+        </div>
         {% endif %}
-    </ul>
+    </div>
 </section>
 {% endblock %}

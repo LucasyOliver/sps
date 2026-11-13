@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils import timezone
 from accounts.models import User, UserRoleChoices
+from clients.models import Client, normalize_digits
 from salons.models import SalonBusinessHours, SalonHoliday
 from scheduling.models import (
     ACTIVE_APPOINTMENT_STATUSES,
@@ -523,3 +524,147 @@ class SchedulingService:
         appointment.full_clean()
         appointment.save()
         return appointment
+
+    @classmethod
+    def upsert_public_client(
+        cls,
+        *,
+        salon,
+        full_name: str,
+        phone: str,
+        email: str = '',
+        cpf_cnpj: str = '',
+    ) -> Client:
+        phone_digits = normalize_digits(phone)
+        if len(phone_digits) not in (10, 11):
+            raise ValidationError(
+                {'client_phone': 'O telefone deve conter 10 ou 11 dígitos numéricos (com DDD).'}
+            )
+
+        doc_digits = normalize_digits(cpf_cnpj)
+        if doc_digits and len(doc_digits) not in (11, 14):
+            raise ValidationError(
+                {'client_cpf_cnpj': 'Informe um CPF válido (11 dígitos) ou CNPJ válido (14 dígitos).'}
+            )
+
+        existing = Client.objects.for_salon(salon).filter(phone=phone_digits).first()
+        if existing is None and doc_digits:
+            existing = (
+                Client.objects.for_salon(salon).filter(cpf_cnpj=doc_digits).first()
+            )
+
+        if existing is not None:
+            existing.full_name = (full_name or '').strip() or existing.full_name
+            existing.phone = phone_digits
+            if email and email.strip():
+                existing.email = email.strip()
+            if doc_digits:
+                existing.cpf_cnpj = doc_digits
+            existing.is_active = True
+            existing.full_clean()
+            existing.save()
+            return existing
+
+        client = Client(
+            salon=salon,
+            full_name=(full_name or '').strip(),
+            phone=phone_digits,
+            email=(email or '').strip(),
+            cpf_cnpj=doc_digits,
+            is_active=True,
+        )
+        client.full_clean()
+        client.save()
+        return client
+
+    @classmethod
+    def create_public_appointment(
+        cls,
+        *,
+        salon,
+        professional,
+        start_at: datetime,
+        services,
+        client_full_name: str,
+        client_phone: str,
+        client_email: str = '',
+        client_cpf_cnpj: str = '',
+        notes: str = '',
+    ) -> Appointment:
+        with transaction.atomic():
+            client = cls.upsert_public_client(
+                salon=salon,
+                full_name=client_full_name,
+                phone=client_phone,
+                email=client_email,
+                cpf_cnpj=client_cpf_cnpj,
+            )
+            return cls.create_appointment(
+                salon=salon,
+                client=client,
+                professional=professional,
+                start_at=start_at,
+                services=services,
+                notes=notes,
+                created_by=None,
+            )
+
+    @classmethod
+    def can_cancel_publicly(
+        cls,
+        *,
+        appointment: Appointment,
+        now: datetime | None = None,
+    ) -> tuple[bool, datetime]:
+        current_time = AvailabilityService.ensure_aware(now or timezone.now())
+        min_hours = int(getattr(appointment.salon, 'cancellation_min_hours', 0) or 0)
+        cutoff = AvailabilityService.ensure_aware(appointment.start_at) - timedelta(
+            hours=min_hours
+        )
+        is_allowed = (
+            appointment.status in ACTIVE_APPOINTMENT_STATUSES
+            and current_time <= cutoff
+        )
+        return is_allowed, cutoff
+
+    @classmethod
+    def cancel_public_appointment(
+        cls,
+        *,
+        salon,
+        appointment: Appointment,
+        cancellation_reason: str = '',
+        now: datetime | None = None,
+    ) -> Appointment:
+        if salon is None or appointment.salon_id != salon.id:
+            raise ValidationError('Agendamento inválido para este salão.')
+
+        if appointment.status not in ACTIVE_APPOINTMENT_STATUSES:
+            raise ValidationError(
+                'Este agendamento já não está mais ativo para cancelamento.'
+            )
+
+        can_cancel, _cutoff = cls.can_cancel_publicly(
+            appointment=appointment,
+            now=now,
+        )
+        if not can_cancel:
+            raise ValidationError(
+                f'O prazo para cancelamento online encerrou (antecedência mínima de '
+                f'{salon.cancellation_min_hours}h antes do atendimento). '
+                f'Entre em contato diretamente com a recepção do salão.'
+            )
+
+        reason = (
+            (cancellation_reason or '').strip()
+            or 'Cancelado pelo cliente no portal público de autoagendamento.'
+        )
+        updated = cls.transition_status(
+            appointment=appointment,
+            new_status=AppointmentStatusChoices.CANCELLED,
+            cancellation_reason=reason,
+        )
+        if now is not None:
+            updated.cancelled_at = AvailabilityService.ensure_aware(now)
+            updated.save(update_fields=['cancelled_at', 'updated_at'])
+        return updated

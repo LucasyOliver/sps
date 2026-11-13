@@ -1,0 +1,54 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ salon.trade_name }} — Agendamento Online | SPS{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/sps-design-system.css' %}">
+</head>
+<body>
+    <header class="sps-public-header">
+        <div style="max-width: 56rem; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <span class="sps-brand-badge">{{ salon.trade_name|slice:":1"|upper }}</span>
+                <div>
+                    <a href="{% url 'public_booking:salon_booking' salon_slug=salon.slug %}" class="sps-brand-title">
+                        {{ salon.trade_name }}
+                    </a>
+                    <div style="font-size: 0.75rem; color: var(--sps-text-muted);">
+                        Portal Público de Autoagendamento • SPS
+                        {% if salon.phone %} • Tel/WhatsApp: {{ salon.phone }}{% endif %}
+                    </div>
+                </div>
+            </div>
+            <div>
+                <span class="sps-badge sps-badge-accent">
+                    Cancelamento online até {{ salon.cancellation_min_hours }}h antes
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <main class="sps-public-container">
+        {% if messages %}
+            <div aria-live="polite">
+                {% for message in messages %}
+                    <div class="sps-alert {% if 'error' in message.tags %}sps-alert-error{% elif 'warning' in message.tags %}sps-alert-warning{% else %}sps-alert-success{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+
+        <footer style="margin-top: 2rem; text-align: center; font-size: 0.75rem; color: var(--sps-text-muted);">
+            <p>
+                {{ salon.trade_name }} — Powered by <strong>SPS (Sistema Para Salões)</strong> •
+                Fuso horário: {{ salon.timezone }}
+            </p>
+        </footer>
+    </main>
+</body>
+</html>

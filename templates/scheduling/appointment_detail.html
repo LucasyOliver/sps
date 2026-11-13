@@ -17,8 +17,11 @@
         <li><strong>Fim Estimado:</strong> {{ appointment.end_at|date:'d/m/Y H:i' }}</li>
         <li><strong>Duração Total:</strong> {{ appointment.total_duration_minutes }} minutos</li>
         <li><strong>Valor Total Estimado:</strong> R$ {{ appointment.total_estimated_amount }}</li>
-        <li><strong>Status Atual:</strong> {{ appointment.get_status_display }}</li>
-        <li><strong>Token Público:</strong> <code>{{ appointment.public_token }}</code></li>
+        <li><strong>Status Atual:</strong> <span class="sps-badge sps-badge-{{ appointment.status }}">{{ appointment.get_status_display }}</span></li>
+        <li>
+            <strong>Token Público:</strong> <code class="sps-mono">{{ appointment.public_token }}</code>
+            (<a href="{% url 'public_booking:appointment_detail' salon_slug=request.salon.slug public_token=appointment.public_token %}" target="_blank" rel="noopener">Abrir comprovante público</a>)
+        </li>
         <li><strong>Observações:</strong> {{ appointment.notes|default:"—" }}</li>
         {% if appointment.cancellation_reason %}
             <li><strong>Motivo do Cancelamento:</strong> {{ appointment.cancellation_reason }} (em {{ appointment.cancelled_at|date:'d/m/Y H:i' }})</li>

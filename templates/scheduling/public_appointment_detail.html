@@ -1,0 +1,111 @@
+{% extends 'public_base.html' %}
+
+{% block title %}Comprovante de Agendamento — {{ salon.trade_name }} | SPS{% endblock %}
+
+{% block content %}
+<section class="sps-card">
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
+        <div>
+            <h1 style="margin-bottom: 0.25rem;">Detalhes do seu Agendamento</h1>
+            <div style="font-size: 0.8rem; color: var(--sps-text-muted);">
+                Código público: <code class="sps-mono">{{ appointment.public_token }}</code>
+            </div>
+        </div>
+        <span class="sps-badge sps-badge-{{ appointment.status }}">
+            {{ appointment.get_status_display }}
+        </span>
+    </div>
+
+    <div class="sps-grid-kpi">
+        <div class="sps-kpi-card">
+            <div class="sps-kpi-label">Data e Horário</div>
+            <div style="font-size: 1.15rem; font-weight: 600;">
+                {{ appointment.start_at|date:'d/m/Y H:i' }} às {{ appointment.end_at|date:'H:i' }}
+            </div>
+            <div style="font-size: 0.75rem; color: var(--sps-text-muted); margin-top: 0.25rem;">
+                Duração total: {{ appointment.total_duration_minutes }} min
+            </div>
+        </div>
+        <div class="sps-kpi-card">
+            <div class="sps-kpi-label">Profissional</div>
+            <div style="font-size: 1.15rem; font-weight: 600;">{{ appointment.professional.full_name }}</div>
+            <div style="font-size: 0.75rem; color: var(--sps-text-muted); margin-top: 0.25rem;">
+                Unidade: {{ salon.trade_name }}
+            </div>
+        </div>
+        <div class="sps-kpi-card">
+            <div class="sps-kpi-label">Valor Total Estimado</div>
+            <div class="sps-kpi-value">R$ {{ appointment.total_estimated_amount }}</div>
+            <div style="font-size: 0.75rem; color: var(--sps-text-muted); margin-top: 0.25rem;">
+                Cliente: {{ appointment.client.full_name }}
+            </div>
+        </div>
+    </div>
+
+    <h2>Serviços Selecionados</h2>
+    <div class="sps-table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Serviço</th>
+                    <th>Duração Estimada</th>
+                    <th>Valor</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in appointment.items.all %}
+                    <tr>
+                        <td><strong>{{ item.service.name }}</strong></td>
+                        <td>{{ item.duration_minutes_snapshot }} min</td>
+                        <td>R$ {{ item.price_snapshot }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if appointment.cancellation_reason %}
+        <div class="sps-alert sps-alert-error">
+            <strong>Motivo do cancelamento:</strong> {{ appointment.cancellation_reason }}
+            {% if appointment.cancelled_at %} ({{ appointment.cancelled_at|date:'d/m/Y H:i' }}){% endif %}
+        </div>
+    {% endif %}
+</section>
+
+<section class="sps-card">
+    <h2>Cancelamento Online</h2>
+    {% if form.non_field_errors %}
+        <div class="sps-alert sps-alert-error" role="alert">
+            {{ form.non_field_errors }}
+        </div>
+    {% endif %}
+
+    {% if appointment.status == 'cancelado' %}
+        <p style="color: var(--sps-text-muted);">Este agendamento já se encontra cancelado.</p>
+    {% elif can_cancel %}
+        <p style="color: var(--sps-text-secondary); margin-bottom: 1rem;">
+            Você pode cancelar este agendamento gratuitamente pelo portal até
+            <strong>{{ cancellation_cutoff|date:'d/m/Y H:i' }}</strong>
+            (antecedência mínima de {{ salon.cancellation_min_hours }}h).
+        </p>
+        <form method="post" novalidate>
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn-danger">Cancelar Agendamento</button>
+        </form>
+    {% else %}
+        <div class="sps-alert sps-alert-warning">
+            O prazo para cancelamento online encerrou em <strong>{{ cancellation_cutoff|date:'d/m/Y H:i' }}</strong>
+            (antecedência mínima de {{ salon.cancellation_min_hours }}h configurada pelo salão).
+            Para alterações de última hora, entre em contato diretamente com a recepção de <strong>{{ salon.trade_name }}</strong>
+            {% if salon.phone %}pelo telefone/WhatsApp <strong>{{ salon.phone }}</strong>{% endif %}.
+        </div>
+    {% endif %}
+
+    <div style="margin-top: 1.25rem;">
+        <a href="{% url 'public_booking:salon_booking' salon_slug=salon.slug %}" class="btn-secondary">
+            Realizar Novo Agendamento
+        </a>
+    </div>
+</section>
+{% endblock %}
