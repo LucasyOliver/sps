@@ -5,6 +5,12 @@ from django.core.management.base import CommandError
 from django.db.utils import OperationalError
 from django.test import TestCase, override_settings
 from django.urls import reverse
+from finance.models import CommissionEntry
+from fiscal.models import FiscalDocumentRecord
+from inventory.models import Product
+from orders.models import ServiceOrder
+from salons.models import Salon
+from scheduling.models import Appointment
 
 
 class HealthcheckAndWaitForDbTests(TestCase):
@@ -44,3 +50,28 @@ class HealthcheckAndWaitForDbTests(TestCase):
         )
         with self.assertRaises(CommandError):
             call_command('wait_for_db', timeout=1, interval=0.2, stdout=StringIO())
+
+    @override_settings(DEBUG=False)
+    def test_seed_demo_data_blocked_when_debug_is_false(self):
+        """S10-T01 / RNF-006: Impede execução acidental de seed_demo_data em produção (DEBUG=False)."""
+        with self.assertRaises(CommandError):
+            call_command('seed_demo_data', stdout=StringIO())
+
+    @override_settings(DEBUG=True)
+    def test_seed_demo_data_populates_multi_tenant_ecosystem_idempotently(self):
+        """S10-T01 / S10-T04: Popula múltiplos salões, comandas pagas, comissões e registros fiscais."""
+        out = StringIO()
+        call_command('seed_demo_data', stdout=out)
+        self.assertIn('Carga demo concluída com sucesso', out.getvalue())
+
+        self.assertEqual(Salon.objects.count(), 2)
+        self.assertGreaterEqual(Product.objects.count(), 4)
+        self.assertGreaterEqual(Appointment.objects.count(), 2)
+        self.assertGreaterEqual(ServiceOrder.objects.count(), 2)
+        self.assertGreaterEqual(CommissionEntry.objects.count(), 2)
+        self.assertGreaterEqual(FiscalDocumentRecord.objects.count(), 2)
+
+        # Segunda execução deve ser idempotente sem duplicar salões ou comandas
+        call_command('seed_demo_data', stdout=StringIO())
+        self.assertEqual(Salon.objects.count(), 2)
+        self.assertEqual(ServiceOrder.objects.count(), 2)

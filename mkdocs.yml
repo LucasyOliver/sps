@@ -1,0 +1,43 @@
+site_name: "SPS — Sistema Para Salões (Documentação Técnica e Operacional)"
+site_description: "Documentação oficial da plataforma SaaS multi-tenant SPS (Sistema Para Salões)"
+docs_dir: docs
+site_dir: site
+
+nav:
+  - Início: index.md
+  - Planejamento e PRD:
+      - PRD Central (v1.0.0): 01_planejamento/prd_do_projeto.md
+      - Requisitos (RF e RNF): 01_planejamento/requisitos_do_projeto.md
+      - Arquitetura, Dados e Segurança: 01_planejamento/arquitetura_dados_e_seguranca_prd.md
+      - Catálogo do Design System: 01_planejamento/catalogo_design_system.md
+      - Sprints de Implementação: 01_planejamento/sprints_de_implementacao_prd.md
+      - Guia de Deploy (PRD): 01_planejamento/guia_deploy_vps_swarm_e_operacao_prd.md
+      - Prompt Inicial: 01_planejamento/prompt_inicial_do_projeto.md
+      - Prompt Refinado: 01_planejamento/prompt_refinado_do_projeto.md
+  - Decisões Arquiteturais:
+      - Decisões Iniciais (DEC-001 a DEC-003): 03_decisoes/decisoes_arquiteturais_iniciais.md
+  - Execução e Evidências:
+      - Estado Atual do Projeto: 02_execucao/estado_do_projeto.md
+      - Sprint 01 (Fundação e Auth): 02_execucao/evidencias_da_sprint_001.md
+      - Sprint 02 (Salão e Expediente): 02_execucao/evidencias_da_sprint_002.md
+      - Sprint 03 (Catálogo e Clientes): 02_execucao/evidencias_da_sprint_003.md
+      - Sprint 04 (Agenda Interna): 02_execucao/evidencias_da_sprint_004.md
+      - Sprint 05 (Design System e Portal Público): 02_execucao/evidencias_da_sprint_005.md
+      - Sprint 06 (Estoque e Comandas): 02_execucao/evidencias_da_sprint_006.md
+      - Sprint 07 (Caixa, Comissões e Fiscal): 02_execucao/evidencias_da_sprint_007.md
+      - Sprint 08 (Celery, Notificações e PDFs): 02_execucao/evidencias_da_sprint_008.md
+      - Sprint 09 (Assistente de IA LangGraph): 02_execucao/evidencias_da_sprint_009.md
+      - Sprint 10 (Seed Demo, MkDocs e Swarm): 02_execucao/evidencias_da_sprint_010.md
+  - Operação e Produção:
+      - Runbook de Implantação e Backup: 04_operacao/runbook_de_implantacao.md
+
+markdown_extensions:
+  - tables
+  - admonition
+  - toc:
+      permalink: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format

@@ -37,13 +37,13 @@ este arquivo e respeitar as condições de passagem.
     "ferramentas_verificadas": true,
     "venv_criada": true
   },
-  "sprint_solicitada": "Sprint 09",
+  "sprint_solicitada": "Sprint 10",
   "sprint_em_execucao": null,
   "bloqueios": [],
-  "ultima_entrega": "Sprint 09 concluida, revisada e verificada (52 testes automatizados aprovados; app ai_assistant com LangChain e LangGraph entregue; evidencias em docs/02_execucao/evidencias_da_sprint_009.md).",
+  "ultima_entrega": "Sprint 10 (Entrega Final do MVP) concluida, revisada e verificada (54 testes automatizados aprovados; seed_demo_data, MkDocs e artefatos Docker Swarm entregues; evidencias em docs/02_execucao/evidencias_da_sprint_010.md).",
   "git_executado_pela_ia": false,
-  "acao_git_informada_pelo_usuario": "usuario_solicitou_sprint_09_recomendacao_de_commit_mantida",
-  "proxima_acao_permitida": "revisao_e_commit_pelo_usuario_ou_solicitacao_da_sprint_10"
+  "acao_git_informada_pelo_usuario": "usuario_solicitou_sprint_10_mvp_concluido_aguardando_versionamento_e_deploy_pelo_usuario",
+  "proxima_acao_permitida": "versionamento_git_github_e_decisao_de_deploy_pelo_desenvolvedor"
 }
 ```
 
@@ -89,6 +89,7 @@ Pendências de instalação local: Instalar/ativar Docker Desktop no Windows ant
 | `2026-11-18` | `aguardando_acao_git_do_usuario` | `aguardando_acao_git_do_usuario` | Desenvolvedor solicitou `Sprint 07`; `Sprint 07` implementada, revisada e verificada com 46 testes automatizados aprovados ([`evidencias_da_sprint_007.md`](evidencias_da_sprint_007.md)). |
 | `2026-11-18` | `aguardando_acao_git_do_usuario` | `aguardando_acao_git_do_usuario` | Desenvolvedor solicitou `Sprint 08`; `Sprint 08` implementada, revisada e verificada com 50 testes automatizados aprovados ([`evidencias_da_sprint_008.md`](evidencias_da_sprint_008.md)). |
 | `2026-11-18` | `aguardando_acao_git_do_usuario` | `aguardando_acao_git_do_usuario` | Desenvolvedor solicitou `Sprint 09`; `Sprint 09` implementada, revisada e verificada com 52 testes automatizados aprovados ([`evidencias_da_sprint_009.md`](evidencias_da_sprint_009.md)). |
+| `2026-11-18` | `aguardando_acao_git_do_usuario` | `aguardando_acao_git_do_usuario` | Desenvolvedor solicitou `Sprint 10`; `Sprint 10` (entrega final do MVP) implementada, revisada e verificada com 54 testes automatizados aprovados ([`evidencias_da_sprint_010.md`](evidencias_da_sprint_010.md)). |
 
 ---
 
@@ -103,7 +104,7 @@ Pendências de instalação local: Instalar/ativar Docker Desktop no Windows ant
 | [`sps/docs/01_planejamento/prd_do_projeto.md`](../01_planejamento/prd_do_projeto.md) | `prd_aprovado` | Documento central e índice do PRD `v1.0.0` (aprovado em `2026-11-12`). |
 | [`sps/docs/01_planejamento/arquitetura_dados_e_seguranca_prd.md`](../01_planejamento/arquitetura_dados_e_seguranca_prd.md) | `prd_aprovado` | Arquitetura Django, modelagem conceitual completa (incluindo fiscal), transações e IA. |
 | [`sps/docs/01_planejamento/guia_deploy_vps_swarm_e_operacao_prd.md`](../01_planejamento/guia_deploy_vps_swarm_e_operacao_prd.md) | `prd_aprovado` | Guia passo a passo de deploy em VPS Ubuntu com Docker Swarm, Traefik e Cloudflare DNS-01. |
-| [`sps/docs/01_planejamento/sprints_de_implementacao_prd.md`](../01_planejamento/sprints_de_implementacao_prd.md) | `Sprints 01-09 [x]` | Planejamento das 10 sprints com checklists (`Sprints 01 a 09` concluídas). |
+| [`sps/docs/01_planejamento/sprints_de_implementacao_prd.md`](../01_planejamento/sprints_de_implementacao_prd.md) | `Sprints 01-10 [x]` | Planejamento das 10 sprints com checklists (`Sprints 01 a 10` concluídas). |
 | [`sps/docs/01_planejamento/catalogo_design_system.md`](../01_planejamento/catalogo_design_system.md) | Aprovado | Catálogo visual extraído de `sps/design_system/refs/` com auditoria de segurança e tokens. |
 | [`sps/docs/03_decisoes/decisoes_arquiteturais_iniciais.md`](../03_decisoes/decisoes_arquiteturais_iniciais.md) | Aprovado | Registro formal de `DEC-001` (Testes), `DEC-002` (Multi-tenant) e `DEC-003` (Fiscal). |
 | [`sps/docs/02_execucao/evidencias_da_sprint_001.md`](evidencias_da_sprint_001.md) | Concluído | Evidências, revisão, correção e suíte de 12 testes da `Sprint 01`. |
@@ -115,6 +116,8 @@ Pendências de instalação local: Instalar/ativar Docker Desktop no Windows ant
 | [`sps/docs/02_execucao/evidencias_da_sprint_007.md`](evidencias_da_sprint_007.md) | Concluído | Evidências, revisão, correção e suíte acumulada de 46 testes da `Sprint 07`. |
 | [`sps/docs/02_execucao/evidencias_da_sprint_008.md`](evidencias_da_sprint_008.md) | Concluído | Evidências, revisão, correção e suíte acumulada de 50 testes da `Sprint 08`. |
 | [`sps/docs/02_execucao/evidencias_da_sprint_009.md`](evidencias_da_sprint_009.md) | Concluído | Evidências, revisão, correção e suíte acumulada de 52 testes da `Sprint 09`. |
+| [`sps/docs/02_execucao/evidencias_da_sprint_010.md`](evidencias_da_sprint_010.md) | Concluído | Evidências, revisão final do MVP e suíte acumulada de 54 testes da `Sprint 10`. |
+| [`sps/docs/04_operacao/runbook_de_implantacao.md`](../04_operacao/runbook_de_implantacao.md) | Aprovado | Runbook de implantação em VPS Ubuntu com Docker Swarm, backup e restauração. |
 | [`sps/docs/02_execucao/estado_do_projeto.md`](estado_do_projeto.md) | Atualizado | Controle de estado, inventário local e próxima ação permitida. |
 
 ---
@@ -176,11 +179,11 @@ Não realize operações de Git/GitHub e não inicie outra etapa ou sprint sem s
 
 ---
 
-## 9. Checklist de Passagem para a Próxima Etapa (`aguardando_acao_git_do_usuario` -> `Sprint 10`)
+## 9. Checklist Final de Conclusão das 10 Sprints do MVP (`aguardando_acao_git_do_usuario`)
 
 - [x] Pasta do produto (`sps/`) criada separadamente da pasta do guia (`guia_desenvolvimento_ia/`).
-- [x] Todos os módulos Markdown em `sps/docs/` possuem entre 150 e 400 linhas.
+- [x] Todos os 22 módulos Markdown em `sps/docs/` possuem entre 150 e 400 linhas.
 - [x] PRD `v1.0.0` aprovado explicitamente pelo desenvolvedor.
-- [x] `Sprints 01 a 09` implementadas, revisadas e verificadas com 52 testes automatizados aprovados ([`evidencias_da_sprint_009.md`](evidencias_da_sprint_009.md)).
+- [x] `Sprints 01 a 10` implementadas, revisadas e verificadas com 54 testes automatizados aprovados ([`evidencias_da_sprint_010.md`](evidencias_da_sprint_010.md)).
 - [x] Nenhum comando `git` ou `gh` foi executado pela IA (`git_executado_pela_ia: false`).
-- [ ] **Próximo passo do desenvolvedor:** Revisar a entrega da `Sprint 09`, realizar manualmente o commit/push no Git/GitHub (ou optar por adiar) e solicitar explicitamente a execução da `Sprint 10`.
+- [ ] **Próximo passo do desenvolvedor:** Revisar a entrega final da `Sprint 10` (MVP completo), realizar manualmente o versionamento (`git add`, `git commit`, `git push`) no Git/GitHub e, quando desejar publicar em homologação/produção, definir os parâmetros `dominio_principal`, `registry_imagem` e `modelo_llm` seguindo o [`runbook_de_implantacao.md`](../04_operacao/runbook_de_implantacao.md).

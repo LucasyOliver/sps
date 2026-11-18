@@ -154,12 +154,12 @@ modulo_pai: "prd_do_projeto.md"
 
 ## Sprint 10: Carga Demo (`seed_demo_data`), Documentação `MkDocs` e Deploy Swarm
 
-- **Solicitação do usuário:** `pendente`
+- **Solicitação do usuário:** `solicitada e concluída em 2026-11-18`
 - **Requisitos atendidos:** `RNF-004`, `RNF-005`, `RNF-006`
 - **Pré-condições:** `Sprint 09` concluída.
 - **Tarefas da Sprint:**
-  - [ ] `S10-T01`: Implementar management command `seed_demo_data` populando múltiplos salões, equipes, serviços, regras de comissão, clientes, agendamentos passados/atuais/futuros, comandas pagas, movimentações de estoque e registros fiscais preparatórios (bloqueando execução acidental quando `DEBUG=False`).
-  - [ ] `S10-T02`: Configurar `mkdocs.yml` com suporte a renderização `Mermaid` e consolidar a documentação técnica e operacional em `sps/docs/`.
-  - [ ] `S10-T03`: Criar `Dockerfile` de produção, `docker-stack.yml` (Swarm + Traefik + Cloudflare DNS-01 + Docker Secrets), `scripts/deploy.sh` (sem nenhum comando Git/GH) e scripts de backup/restauração em `docs/04_operacao/runbook_de_implantacao.md`.
-  - [ ] `S10-T04`: Executar suíte completa de testes automatizados do projeto e validar carga `seed_demo_data` e build do `MkDocs`.
-  - [ ] `S10-T05`: Revisar entrega final do MVP, registrar `evidencias_da_sprint_010.md` e entregar ao usuário para versionamento Git/GitHub e decisão de deploy.
+  - [x] `S10-T01`: Implementar management command `seed_demo_data` populando múltiplos salões, equipes, serviços, regras de comissão, clientes, agendamentos passados/atuais/futuros, comandas pagas, movimentações de estoque e registros fiscais preparatórios (bloqueando execução acidental quando `DEBUG=False`).
+  - [x] `S10-T02`: Configurar `mkdocs.yml` com suporte a renderização `Mermaid` e consolidar a documentação técnica e operacional em `sps/docs/`.
+  - [x] `S10-T03`: Criar `Dockerfile` de produção, `docker-stack.yml` (Swarm + Traefik + Cloudflare DNS-01 + Docker Secrets), `scripts/deploy.sh` (sem nenhum comando Git/GH) e scripts de backup/restauração em `docs/04_operacao/runbook_de_implantacao.md`.
+  - [x] `S10-T04`: Executar suíte completa de testes automatizados do projeto e validar carga `seed_demo_data` e build do `MkDocs`.
+  - [x] `S10-T05`: Revisar entrega final do MVP, registrar `evidencias_da_sprint_010.md` e entregar ao usuário para versionamento Git/GitHub e decisão de deploy.
