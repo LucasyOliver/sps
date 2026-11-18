@@ -6,9 +6,16 @@
 <section>
     <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
         <h2 style="margin: 0;">Extrato e Repasse de Comissões — {{ request.salon.trade_name }}</h2>
-        {% if user.role != 'profissional' %}
-            <a href="{% url 'finance:cash_dashboard' %}" class="btn-secondary">Voltar ao Caixa</a>
-        {% endif %}
+        <div style="display: flex; gap: 0.5rem;">
+            {% if user.role == 'gestor' or user.role == 'profissional' %}
+                <a href="{% url 'reports:pdf_commissions' %}{% if selected_professional %}?professional={{ selected_professional }}{% endif %}" class="btn-secondary">
+                    Baixar Extrato em PDF
+                </a>
+            {% endif %}
+            {% if user.role != 'profissional' %}
+                <a href="{% url 'finance:cash_dashboard' %}" class="btn-secondary">Voltar ao Caixa</a>
+            {% endif %}
+        </div>
     </div>
 
     <div class="sps-grid-kpi" style="margin-top: 1.25rem;">

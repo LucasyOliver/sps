@@ -124,16 +124,16 @@ modulo_pai: "prd_do_projeto.md"
 
 ## Sprint 08: Filas Assíncronas (Celery), Notificações, Dashboard e Relatórios PDF
 
-- **Solicitação do usuário:** `pendente`
+- **Solicitação do usuário:** `solicitada e concluída em 2026-11-18`
 - **Requisitos atendidos:** `RF-010`, `RF-011`, `RNF-001`, `RNF-005`
 - **Pré-condições:** `Sprint 07` concluída.
 - **Tarefas da Sprint:**
-  - [ ] `S08-T01`: Configurar `core/celery.py` (RabbitMQ broker, Redis result backend/cache), schedules do Celery Beat e integrar `dj-celery-panel` ao Django Admin.
-  - [ ] `S08-T02`: Criar app `notifications` com `NotificationLog` e tasks Celery idempotentes para envio de e-mail nativo do Django na confirmação, cancelamento e lembrete periódico de agendamentos.
-  - [ ] `S08-T03`: Criar app `reports` com Dashboard Gerencial (faturamento bruto/líquido, comandas, comissões pendentes/pagas, taxa de comparecimento e alertas de estoque crítico).
-  - [ ] `S08-T04`: Implementar exportação privada de relatórios em PDF (`ReportLab` + `PyPDF`) para: (1) Extrato de Comissões por Profissional/Período; (2) Fechamento de Caixa; (3) Posição e Movimentação de Estoque, validando tenant e perfil antes de entregar o PDF.
-  - [ ] `S08-T05`: Escrever e executar testes automatizados (`DEC-001`) de idempotência de notificações e de bloqueio (`403`) ao tentar baixar PDF de outro salão ou de outro profissional.
-  - [ ] `S08-T06`: Revisar incremento, registrar `evidencias_da_sprint_008.md` e entregar para ação de Git/GitHub do usuário.
+  - [x] `S08-T01`: Configurar `core/celery.py` (RabbitMQ broker, Redis result backend/cache), schedules do Celery Beat e integrar `dj-celery-panel` ao Django Admin.
+  - [x] `S08-T02`: Criar app `notifications` com `NotificationLog` e tasks Celery idempotentes para envio de e-mail nativo do Django na confirmação, cancelamento e lembrete periódico de agendamentos.
+  - [x] `S08-T03`: Criar app `reports` com Dashboard Gerencial (faturamento bruto/líquido, comandas, comissões pendentes/pagas, taxa de comparecimento e alertas de estoque crítico).
+  - [x] `S08-T04`: Implementar exportação privada de relatórios em PDF (`ReportLab` + `PyPDF`) para: (1) Extrato de Comissões por Profissional/Período; (2) Fechamento de Caixa; (3) Posição e Movimentação de Estoque, validando tenant e perfil antes de entregar o PDF.
+  - [x] `S08-T05`: Escrever e executar testes automatizados (`DEC-001`) de idempotência de notificações e de bloqueio (`403`) ao tentar baixar PDF de outro salão ou de outro profissional.
+  - [x] `S08-T06`: Revisar incremento, registrar `evidencias_da_sprint_008.md` e entregar para ação de Git/GitHub do usuário.
 
 ---
 

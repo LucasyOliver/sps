@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard Gerencial e Relatórios PDF — SPS{% endblock %}
+
+{% block content %}
+<section>
+    <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
+        <h2 style="margin: 0;">Dashboard Gerencial — {{ request.salon.trade_name }}</h2>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <a href="{% url 'reports:pdf_commissions' %}{% if start_date or end_date %}?start_date={{ start_date|date:'Y-m-d' }}&end_date={{ end_date|date:'Y-m-d' }}{% endif %}" class="btn-secondary">
+                PDF Comissões (Geral)
+            </a>
+            <a href="{% url 'reports:pdf_inventory' %}" class="btn-primary">
+                PDF Posição de Estoque
+            </a>
+        </div>
+    </div>
+
+    <form method="get" style="display: flex; gap: 0.75rem; align-items: flex-end; flex-wrap: wrap; margin: 1rem 0;">
+        <div>
+            <label for="start_date">Data inicial</label>
+            <input type="date" id="start_date" name="start_date" value="{{ start_date|date:'Y-m-d' }}">
+        </div>
+        <div>
+            <label for="end_date">Data final</label>
+            <input type="date" id="end_date" name="end_date" value="{{ end_date|date:'Y-m-d' }}">
+        </div>
+        <button type="submit" class="btn-secondary">Filtrar Período</button>
+    </form>
+
+    <div class="sps-grid-kpi">
+        <div class="sps-kpi-card">
+            <div class="sps-kpi-label">Faturamento Bruto</div>
+            <div class="sps-kpi-value">R$ {{ gross_revenue }}</div>
+            <div class="helptext">Serviços: R$ {{ subtotal_services }} | Produtos: R$ {{ subtotal_products }}</div>
+        </div>
+        <div class="sps-kpi-card">
+            <div class="sps-kpi-label">Faturamento Líquido</div>
+            <div class="sps-kpi-value" style="color: var(--sps-primary);">R$ {{ net_revenue }}</div>
+            <div class="helptext">{{ paid_orders_count }} comanda(s) paga(s) • Ticket médio: R$ {{ average_ticket }}</div>
+        </div>
+        <div class="sps-kpi-card">
+            <div class="sps-kpi-label">Comissões Pendentes / Pagas</div>
+            <div class="sps-kpi-value" style="font-size: 1.35rem;">R$ {{ commissions_pending_total }} / R$ {{ commissions_paid_total }}</div>
+            <div class="helptext"><a href="{% url 'finance:commission_list' %}">Gerenciar repasses</a></div>
+        </div>
+        <div class="sps-kpi-card">
+            <div class="sps-kpi-label">Taxa de Comparecimento</div>
+            <div class="sps-kpi-value">{{ attendance_rate_pct }}%</div>
+            <div class="helptext">Concluídos: {{ completed_appointments }} | No-show: {{ no_show_appointments }} ({{ no_show_rate_pct }}%)</div>
+        </div>
+    </div>
+
+    <div class="sps-grid-2">
+        <div class="sps-card">
+            <h3>Exportar Extrato de Comissões em PDF por Profissional</h3>
+            <form method="get" action="{% url 'reports:pdf_commissions' %}">
+                <label for="pdf_prof">Profissional</label>
+                <select id="pdf_prof" name="professional">
+                    <option value="">Todos os profissionais</option>
+                    {% for prof in professionals %}
+                        <option value="{{ prof.pk }}">{{ prof.full_name }}</option>
+                    {% endfor %}
+                </select>
+                {% if start_date %}<input type="hidden" name="start_date" value="{{ start_date|date:'Y-m-d' }}">{% endif %}
+                {% if end_date %}<input type="hidden" name="end_date" value="{{ end_date|date:'Y-m-d' }}">{% endif %}
+                <div style="margin-top: 0.75rem;">
+                    <button type="submit" class="btn-primary">Baixar PDF de Comissões</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="sps-card">
+            <h3>Alertas de Estoque Crítico ({{ low_stock_count }})</h3>
+            {% if low_stock_products %}
+                <ul>
+                    {% for prod in low_stock_products %}
+                        <li>
+                            <strong>{{ prod.name }}</strong> — Saldo:
+                            <span class="sps-badge sps-badge-danger">{{ prod.current_stock }} {{ prod.unit }}</span>
+                            (Mínimo: {{ prod.min_stock_alert }})
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="helptext">Nenhum produto abaixo do estoque mínimo no momento.</p>
+            {% endif %}
+            <a href="{% url 'reports:pdf_inventory' %}" class="btn-secondary">Baixar PDF de Estoque</a>
+        </div>
+    </div>
+
+    <h3>Relatórios de Fechamento de Caixa (PDF)</h3>
+    <div class="sps-table-wrap">
+        <table>
+            <thead><tr><th>Sessão</th><th>Abertura</th><th>Fechamento</th><th>Esperado</th><th>Conferido</th><th>Status</th><th>PDF</th></tr></thead>
+            <tbody>
+                {% for s in recent_cash_sessions %}
+                    <tr>
+                        <td><strong>#{{ s.pk }}</strong></td>
+                        <td>{{ s.opened_at|date:'d/m/Y H:i' }} ({{ s.opened_by.full_name }})</td>
+                        <td>{% if s.closed_at %}{{ s.closed_at|date:'d/m/Y H:i' }}{% else %}—{% endif %}</td>
+                        <td>R$ {{ s.closing_balance_expected }}</td>
+                        <td>{% if s.closing_balance_counted is not None %}R$ {{ s.closing_balance_counted }}{% else %}—{% endif %}</td>
+                        <td>{{ s.get_status_display }}</td>
+                        <td><a href="{% url 'reports:pdf_cash_closing' s.pk %}">Baixar PDF</a></td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="7">Nenhuma sessão de caixa registrada.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

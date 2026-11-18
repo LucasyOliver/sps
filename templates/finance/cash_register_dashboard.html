@@ -90,7 +90,7 @@
     <h3>Histórico de Sessões de Caixa</h3>
     <div class="sps-table-wrap">
         <table>
-            <thead><tr><th>Sessão</th><th>Abertura</th><th>Fechamento</th><th>Saldo Inicial</th><th>Esperado</th><th>Conferido</th><th>Status</th></tr></thead>
+            <thead><tr><th>Sessão</th><th>Abertura</th><th>Fechamento</th><th>Saldo Inicial</th><th>Esperado</th><th>Conferido</th><th>Status</th><th>PDF</th></tr></thead>
             <tbody>
                 {% for s in recent_sessions %}
                     <tr>
@@ -105,9 +105,10 @@
                                 {{ s.get_status_display }}
                             </span>
                         </td>
+                        <td><a href="{% url 'reports:pdf_cash_closing' s.pk %}">PDF</a></td>
                     </tr>
                 {% empty %}
-                    <tr><td colspan="7">Nenhuma sessão de caixa registrada neste salão.</td></tr>
+                    <tr><td colspan="8">Nenhuma sessão de caixa registrada neste salão.</td></tr>
                 {% endfor %}
             </tbody>
         </table>

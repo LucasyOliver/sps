@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'dj_celery_panel',
     'base.apps.BaseConfig',
     'salons.apps.SalonsConfig',
     'accounts.apps.AccountsConfig',
@@ -49,6 +50,8 @@ INSTALLED_APPS = [
     'orders.apps.OrdersConfig',
     'finance.apps.FinanceConfig',
     'fiscal.apps.FiscalConfig',
+    'notifications.apps.NotificationsConfig',
+    'reports.apps.ReportsConfig',
 ]
 
 MIDDLEWARE = [
@@ -142,6 +145,21 @@ DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
 CELERY_BROKER_URL = env('CELERY_BROKER_URL')
 CELERY_RESULT_BACKEND = env('CELERY_RESULT_BACKEND')
 CELERY_TIMEZONE = TIME_ZONE
+CELERY_ENABLE_UTC = True
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TASK_ALWAYS_EAGER = env.bool(
+    'CELERY_TASK_ALWAYS_EAGER',
+    default=env.bool('USE_SQLITE_FALLBACK', default=False),
+)
+CELERY_BEAT_SCHEDULE = {
+    'dispatch-upcoming-appointment-reminders-every-30m': {
+        'task': 'notifications.dispatch_upcoming_appointment_reminders_task',
+        'schedule': 1800.0,
+        'kwargs': {'hours_ahead': 24},
+    },
+}
 
 LLM_MODEL = env('LLM_MODEL')
 LLM_API_KEY = env('LLM_API_KEY')
