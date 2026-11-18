@@ -93,6 +93,17 @@ if env.bool('USE_SQLITE_FALLBACK'):
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
+elif env('POSTGRES_PASSWORD', default=''):
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': env('POSTGRES_DB', default='sps_prod'),
+            'USER': env('POSTGRES_USER', default='sps_user'),
+            'PASSWORD': env('POSTGRES_PASSWORD'),
+            'HOST': env('POSTGRES_HOST', default='postgres'),
+            'PORT': env('POSTGRES_PORT', default='5432'),
+        }
+    }
 else:
     DATABASES = {
         'default': env.db(
@@ -144,7 +155,14 @@ EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
 EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS')
 DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
 
-CELERY_BROKER_URL = env('CELERY_BROKER_URL')
+if env('RABBITMQ_DEFAULT_PASS', default=''):
+    _mq_user = env('RABBITMQ_DEFAULT_USER', default='sps_mq')
+    _mq_pass = env('RABBITMQ_DEFAULT_PASS')
+    _mq_host = env('RABBITMQ_HOST', default='rabbitmq')
+    _mq_port = env('RABBITMQ_PORT', default='5672')
+    CELERY_BROKER_URL = f'amqp://{_mq_user}:{_mq_pass}@{_mq_host}:{_mq_port}//'
+else:
+    CELERY_BROKER_URL = env('CELERY_BROKER_URL')
 CELERY_RESULT_BACKEND = env('CELERY_RESULT_BACKEND')
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_ENABLE_UTC = True

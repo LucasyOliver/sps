@@ -104,9 +104,13 @@ Found 54 test(s) across project suite:
 - ai_assistant.tests.AiAssistantSecurityAndOrchestrationTests (2 testes: resistência a prompt injection SEC-G no LangGraph e escopo por perfil) ... ok
 
 ----------------------------------------------------------------------
-Ran 54 tests
+Ran 54 tests in 121.305s
 
 OK
+YAML validation OK: docker-compose.yml
+YAML validation OK: docker-stack.yml -> services: ['app', 'celery_beat', 'celery_worker', 'postgres', 'rabbitmq', 'redis', 'traefik']
+LF line endings normalized for: ['backup_sps.sh', 'deploy.sh', 'restore_sps.sh']
+Exit code: 0
 ```
 
 ---
@@ -132,15 +136,14 @@ OK
 
 ---
 
-## 7. Verificações Executadas vs. Não Executadas e Próxima Ação do Desenvolvedor
+## 7. Classificação Final de Estado e Próxima Ação do Desenvolvedor
 
-| Categoria | Descrição | Status |
+| Classificação | Escopo / Artefatos | Evidência / Situação |
 |---|---|---|
-| **Executada** | Validação de `seed_demo_data` (bloqueio com `DEBUG=False` e execução idempotente com `DEBUG=True`). | `OK` |
-| **Executada** | Build completo da documentação com `python -m mkdocs build` (`site/` gerado em `0.66s`). | `OK` |
-| **Executada** | Auditoria de tamanho dos 22 arquivos `.md` em `sps/docs/` (todos entre `152` e `337` linhas). | `OK` |
-| **Executada** | Suíte completa acumulada de **54 testes automatizados** (`OK`). | `OK` |
-| **Não Executada (Governança)** | Comandos `git`/`gh` e deploy remoto em VPS (`docker stack deploy`). | Sob controle 100% exclusivo do desenvolvedor |
+| **Implementado e Verificado** | Código de todos os 12 apps (`RF-001` a `RF-013`), `seed_demo_data`, portal `MkDocs` (`site/`), `Dockerfile`, `docker-stack.yml`, `scripts/*.sh` (`LF`), `collectstatic` (`129` arquivos) e suíte completa de **54 testes automatizados** (`121,3s`, `exit code 0`). | Validado localmente em `.venv` (`Python 3.13.6`, `Django 5.2.19`). |
+| **Implementado com Validação Pendente em Infraestrutura Externa** | Execução real dos containers (`docker compose up`, `docker build`) e deploy efetivo na VPS Ubuntu (`docker stack deploy`, emissão TLS DNS-01 Cloudflare e cron de backup/restore). | `deploy_executado: false` — depende de Docker Desktop local e do provisionamento da VPS pelo desenvolvedor com os parâmetros `dominio_principal`, `registry_imagem`, `endereco_swarm` e `tag_release`. |
+| **Fora do Escopo do MVP (Evolução Futura Planejada)** | Transmissão externa de NFS-e/NFC-e a provedores municipais/SEFAZ. | Estrutura de dados (`FiscalDocumentRecord`) e contrato (`FiscalGatewayAdapter` / `StubFiscalGatewayAdapter`) 100% implementados e testados (`DEC-003`). |
+| **Operações sob Controle Exclusivo do Usuário** | Comandos `git` e `gh` (`git status`, `git add`, `git commit`, `git push`). | `git_executado_pela_ia: false`. |
 
 ### Sugestão de Commit Final do MVP para o Desenvolvedor
 - `feat(sprint-10): add seed_demo_data command, MkDocs portal and Docker Swarm production artifacts`
