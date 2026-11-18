@@ -17,6 +17,7 @@ urlpatterns = [
     path('comandas/', include('orders.urls', namespace='orders')),
     path('caixa/', include('finance.urls', namespace='finance')),
     path('relatorios/', include('reports.urls', namespace='reports')),
+    path('assistente/', include('ai_assistant.urls', namespace='ai_assistant')),
     path('s/<slug:salon_slug>/', include('scheduling.public_urls', namespace='public_booking')),
     path('', include('base.urls', namespace='base')),
 ]

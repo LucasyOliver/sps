@@ -139,16 +139,16 @@ modulo_pai: "prd_do_projeto.md"
 
 ## Sprint 09: Assistente Gerencial Interno de IA (`LangChain` + `LangGraph`)
 
-- **Solicitação do usuário:** `pendente`
+- **Solicitação do usuário:** `solicitada e concluída em 2026-11-18`
 - **Requisitos atendidos:** `RF-012`, `RNF-001`, `RNF-005`
 - **Pré-condições:** `Sprint 08` concluída.
 - **Tarefas da Sprint:**
-  - [ ] `S09-T01`: Criar app `ai_assistant` com modelos de sessão/mensagens de chat escopados por `salon` e usuário, e fábrica de LLM parametrizada por `.env` (`LLM_MODEL`, `LLM_API_KEY`).
-  - [ ] `S09-T02`: Implementar *tools* somente-leitura (`get_salon_agenda_summary`, `get_revenue_and_commissions_summary`, `get_low_stock_products`, `get_inactive_clients`) que recebem `salon_id` e `user_role` fixados pelo servidor autenticado.
-  - [ ] `S09-T03`: Orquestrar o agente com `LangGraph`, garantindo que `recepcionista` tenha acesso às tools operacionais de agenda/estoque/clientes e `gestor` tenha acesso completo incluindo faturamento/comissões globais.
-  - [ ] `S09-T04`: Implementar interface de chat do Assistente Gerencial Interno no painel do salão.
-  - [ ] `S09-T05`: Escrever e executar testes automatizados (`DEC-001`) verificando que uma sessão do Salão A jamais retorna dados do Salão B nas tools mesmo sob tentativa de *prompt injection*, e que um `profissional` não acessa o assistente gerencial.
-  - [ ] `S09-T06`: Revisar incremento, registrar `evidencias_da_sprint_009.md` e entregar para ação de Git/GitHub do usuário.
+  - [x] `S09-T01`: Criar app `ai_assistant` com modelos de sessão/mensagens de chat escopados por `salon` e usuário, e fábrica de LLM parametrizada por `.env` (`LLM_MODEL`, `LLM_API_KEY`).
+  - [x] `S09-T02`: Implementar *tools* somente-leitura (`get_salon_agenda_summary`, `get_revenue_and_commissions_summary`, `get_low_stock_products`, `get_inactive_clients`) que recebem `salon_id` e `user_role` fixados pelo servidor autenticado.
+  - [x] `S09-T03`: Orquestrar o agente com `LangGraph`, garantindo que `recepcionista` tenha acesso às tools operacionais de agenda/estoque/clientes e `gestor` tenha acesso completo incluindo faturamento/comissões globais.
+  - [x] `S09-T04`: Implementar interface de chat do Assistente Gerencial Interno no painel do salão.
+  - [x] `S09-T05`: Escrever e executar testes automatizados (`DEC-001`) verificando que uma sessão do Salão A jamais retorna dados do Salão B nas tools mesmo sob tentativa de *prompt injection*, e que um `profissional` não acessa o assistente gerencial.
+  - [x] `S09-T06`: Revisar incremento, registrar `evidencias_da_sprint_009.md` e entregar para ação de Git/GitHub do usuário.
 
 ---
 

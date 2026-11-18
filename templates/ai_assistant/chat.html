@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Assistente Gerencial Interno de IA — SPS{% endblock %}
+
+{% block content %}
+<section>
+    <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
+        <div>
+            <h2 style="margin: 0;">Assistente Gerencial Interno de IA — {{ request.salon.trade_name }}</h2>
+            <p class="helptext" style="margin-top: 0.25rem;">
+                Orquestrado via <strong>LangChain + LangGraph</strong> com tools somente-leitura escopadas em <code>salon_id={{ request.salon.pk }}</code> e perfil <code>{{ user.get_role_display }}</code>.
+            </p>
+        </div>
+        <span class="sps-badge sps-badge-accent">
+            Modelo LLM: {{ configured_llm_model }}
+        </span>
+    </div>
+
+    <div class="sps-card" style="margin-top: 1rem; background-color: var(--sps-bg-app);">
+        <h3 style="font-size: 0.9rem; margin-bottom: 0.5rem;">Sugestões Rápidas de Consulta</h3>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            {% if user.role == 'gestor' %}
+                <span class="sps-badge sps-badge-accent">“Qual o faturamento e quanto tenho de comissão pendente?”</span>
+            {% endif %}
+            <span class="sps-badge sps-badge-warning">“Como está a agenda de atendimentos de hoje?”</span>
+            <span class="sps-badge sps-badge-danger">“Quais produtos estão com estoque baixo?”</span>
+            <span class="sps-badge sps-badge-success">“Quais clientes estão inativos há 60 dias?”</span>
+        </div>
+    </div>
+
+    <div style="margin: 1.25rem 0;">
+        {% for msg in chat_messages %}
+            <div class="sps-card" style="margin-bottom: 0.75rem; {% if msg.sender_role == 'assistant' %}border-left: 4px solid var(--sps-primary);{% endif %}">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                    <strong>
+                        {% if msg.sender_role == 'user' %}
+                            Você ({{ user.full_name }})
+                        {% else %}
+                            Assistente IA ({{ request.salon.trade_name }})
+                        {% endif %}
+                    </strong>
+                    <span class="helptext">{{ msg.created_at|date:'d/m/Y H:i' }}</span>
+                </div>
+                <div style="white-space: pre-line;">{{ msg.content }}</div>
+                {% if msg.invoked_tools %}
+                    <div class="helptext" style="margin-top: 0.5rem;">
+                        Tools acionadas: <code>{{ msg.invoked_tools|join:", " }}</code>
+                    </div>
+                {% endif %}
+            </div>
+        {% empty %}
+            <div class="sps-alert">
+                Envie uma pergunta abaixo para consultar indicadores operacionais e gerenciais do seu salão.
+            </div>
+        {% endfor %}
+    </div>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn-primary">Enviar Pergunta ao Assistente</button>
+    </form>
+</section>
+{% endblock %}

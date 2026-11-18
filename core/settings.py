@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'fiscal.apps.FiscalConfig',
     'notifications.apps.NotificationsConfig',
     'reports.apps.ReportsConfig',
+    'ai_assistant.apps.AiAssistantConfig',
 ]
 
 MIDDLEWARE = [
