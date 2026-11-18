@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Caixa Diário — SPS{% endblock %}
+
+{% block content %}
+<section>
+    <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
+        <h2 style="margin: 0;">Caixa Diário — {{ request.salon.trade_name }}</h2>
+        <div style="display: flex; gap: 0.5rem;">
+            <a href="{% url 'orders:order_list' %}" class="btn-secondary">Comandas</a>
+            <a href="{% url 'finance:commission_list' %}" class="btn-secondary">Extrato de Comissões</a>
+        </div>
+    </div>
+
+    {% if open_session %}
+        <div class="sps-grid-kpi" style="margin-top: 1.25rem;">
+            <div class="sps-kpi-card">
+                <div class="sps-kpi-label">Sessão Atual</div>
+                <div class="sps-kpi-value">#{{ open_session.pk }}</div>
+                <div class="helptext">Aberto em {{ open_session.opened_at|date:'d/m/Y H:i' }} por {{ open_session.opened_by.full_name }}</div>
+            </div>
+            <div class="sps-kpi-card">
+                <div class="sps-kpi-label">Saldo Inicial</div>
+                <div class="sps-kpi-value">R$ {{ open_session.opening_balance }}</div>
+            </div>
+            <div class="sps-kpi-card">
+                <div class="sps-kpi-label">Saldo Esperado Atual</div>
+                <div class="sps-kpi-value" style="color: var(--sps-primary);">R$ {{ expected_balance }}</div>
+            </div>
+        </div>
+
+        <div class="sps-grid-2">
+            <div class="sps-card">
+                <h3>Lançamento Avulso (Entrada / Despesa)</h3>
+                <form method="post" action="{% url 'finance:cash_manual_tx' %}" novalidate>
+                    {% csrf_token %}
+                    {{ manual_tx_form.as_p }}
+                    <button type="submit" class="btn-primary">Registrar Lançamento</button>
+                </form>
+            </div>
+            <div class="sps-card">
+                <h3>Fechar Caixa Diário</h3>
+                <form method="post" action="{% url 'finance:cash_close' %}" novalidate>
+                    {% csrf_token %}
+                    {{ close_form.as_p }}
+                    <button type="submit" class="btn-danger">Conferir e Fechar Caixa</button>
+                </form>
+            </div>
+        </div>
+
+        <h3>Movimentações da Sessão Aberta (#{{ open_session.pk }})</h3>
+        <div class="sps-table-wrap">
+            <table>
+                <thead><tr><th>Data/Hora</th><th>Tipo</th><th>Meio</th><th>Descrição</th><th>Comanda</th><th>Valor</th><th>Operador</th></tr></thead>
+                <tbody>
+                    {% for tx in session_transactions %}
+                        <tr>
+                            <td>{{ tx.created_at|date:'d/m/Y H:i' }}</td>
+                            <td>{{ tx.get_transaction_type_display }}</td>
+                            <td>{{ tx.get_payment_method_display }}</td>
+                            <td>{{ tx.description }}</td>
+                            <td>{% if tx.order_id %}<a href="{% url 'orders:order_detail' tx.order_id %}">#{{ tx.order_id }}</a>{% else %}—{% endif %}</td>
+                            <td>
+                                <span class="sps-badge {% if tx.signed_amount >= 0 %}sps-badge-success{% else %}sps-badge-danger{% endif %}">
+                                    R$ {{ tx.signed_amount }}
+                                </span>
+                            </td>
+                            <td>{{ tx.created_by.full_name|default:"—" }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="7">Nenhum lançamento registrado nesta sessão até o momento.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="sps-card" style="margin-top: 1.25rem;">
+            <h3>Abrir Novo Caixa Diário</h3>
+            <p class="helptext" style="margin-bottom: 1rem;">
+                O caixa precisa estar aberto para receber pagamentos de comandas e registrar suprimentos ou despesas do salão.
+            </p>
+            <form method="post" action="{% url 'finance:cash_open' %}" novalidate>
+                {% csrf_token %}
+                {{ open_form.as_p }}
+                <button type="submit" class="btn-primary">Abrir Caixa Diário</button>
+            </form>
+        </div>
+    {% endif %}
+
+    <h3>Histórico de Sessões de Caixa</h3>
+    <div class="sps-table-wrap">
+        <table>
+            <thead><tr><th>Sessão</th><th>Abertura</th><th>Fechamento</th><th>Saldo Inicial</th><th>Esperado</th><th>Conferido</th><th>Status</th></tr></thead>
+            <tbody>
+                {% for s in recent_sessions %}
+                    <tr>
+                        <td><strong>#{{ s.pk }}</strong></td>
+                        <td>{{ s.opened_at|date:'d/m/Y H:i' }} ({{ s.opened_by.full_name }})</td>
+                        <td>{% if s.closed_at %}{{ s.closed_at|date:'d/m/Y H:i' }} ({{ s.closed_by.full_name }}){% else %}—{% endif %}</td>
+                        <td>R$ {{ s.opening_balance }}</td>
+                        <td>R$ {{ s.closing_balance_expected }}</td>
+                        <td>{% if s.closing_balance_counted is not None %}R$ {{ s.closing_balance_counted }}{% else %}—{% endif %}</td>
+                        <td>
+                            <span class="sps-badge {% if s.status == 'aberto' %}sps-badge-warning{% else %}sps-badge-success{% endif %}">
+                                {{ s.get_status_display }}
+                            </span>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="7">Nenhuma sessão de caixa registrada neste salão.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

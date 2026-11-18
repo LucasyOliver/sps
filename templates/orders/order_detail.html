@@ -121,8 +121,104 @@
                 </form>
             </div>
         </div>
-        <div class="sps-alert sps-alert-warning">
-            O fechamento e pagamento no caixa (baixa definitiva de estoque, comissões e registro fiscal) será habilitado na Sprint 07.
+
+        <div class="sps-card" style="border-color: var(--sps-primary);">
+            <h3>Fechar e Receber Pagamento no Caixa (RF-009 / RF-013)</h3>
+            {% if open_cash_session %}
+                <p class="helptext" style="margin-bottom: 1rem;">
+                    Sessão de Caixa aberta: <strong>#{{ open_cash_session.pk }}</strong>.
+                    O fechamento baixa o estoque dos produtos, registra o pagamento no caixa, gera as comissões dos profissionais e consolida o registro fiscal preparatório.
+                </p>
+                <form method="post" action="{% url 'finance:order_checkout' order.pk %}" novalidate>
+                    {% csrf_token %}
+                    {{ checkout_form.as_p }}
+                    <button type="submit" class="btn-primary">Fechar e Pagar Comanda (R$ {{ order.total_amount }})</button>
+                </form>
+            {% else %}
+                <div class="sps-alert sps-alert-warning">
+                    Não há sessão de caixa aberta neste salão.
+                    <a href="{% url 'finance:cash_dashboard' %}"><strong>Abra o Caixa Diário</strong></a> antes de receber o pagamento desta comanda.
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    {% if order_payments %}
+        <h3>Pagamentos Registrados no Caixa</h3>
+        <div class="sps-table-wrap">
+            <table>
+                <thead><tr><th>Meio de Pagamento</th><th>Valor Pago</th><th>Sessão de Caixa</th><th>Status</th></tr></thead>
+                <tbody>
+                    {% for payment in order_payments %}
+                        <tr>
+                            <td>{{ payment.get_payment_method_display }}</td>
+                            <td>R$ {{ payment.amount }}</td>
+                            <td>#{{ payment.cash_session_id }}</td>
+                            <td>
+                                {% if payment.is_reversed %}
+                                    <span class="sps-badge sps-badge-danger">Estornado em {{ payment.reversed_at|date:'d/m/Y H:i' }}</span>
+                                {% else %}
+                                    <span class="sps-badge sps-badge-success">Confirmado</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+
+    {% if commission_entries %}
+        <h3>Comissões Geradas no Pagamento</h3>
+        <div class="sps-table-wrap">
+            <table>
+                <thead><tr><th>Profissional</th><th>Serviço</th><th>Base Líquida</th><th>Percentual</th><th>Comissão</th><th>Status</th></tr></thead>
+                <tbody>
+                    {% for comm in commission_entries %}
+                        <tr>
+                            <td>{{ comm.professional.full_name }}</td>
+                            <td>{{ comm.order_service_item.service.name }}</td>
+                            <td>R$ {{ comm.base_amount }}</td>
+                            <td>{{ comm.commission_pct }}%</td>
+                            <td><strong>R$ {{ comm.commission_amount }}</strong></td>
+                            <td>{{ comm.get_status_display }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+
+    {% if fiscal_record %}
+        <h3>Registro Fiscal Preparatório (NFS-e / NFC-e — RF-013)</h3>
+        <div class="sps-card">
+            <p>
+                <strong>Escopo:</strong> {{ fiscal_record.get_document_scope_display }} |
+                <strong>Status Fiscal:</strong>
+                <span class="sps-badge {% if fiscal_record.status == 'cancelada' %}sps-badge-danger{% else %}sps-badge-accent{% endif %}">
+                    {{ fiscal_record.get_status_display }}
+                </span> |
+                <strong>Provedor:</strong> <code class="sps-mono">{{ fiscal_record.external_provider_name }}</code>
+            </p>
+            <p class="helptext">
+                Emitente: CNPJ {{ fiscal_record.issuer_snapshot.cnpj|default:"Não configurado" }} ({{ fiscal_record.issuer_snapshot.trade_name }}) •
+                Itens de serviço preparados: {{ fiscal_record.services_fiscal_payload|length }} •
+                Itens de produto preparados: {{ fiscal_record.products_fiscal_payload|length }}
+            </p>
+        </div>
+    {% endif %}
+
+    {% if order.status == 'fechada_paga' and user.role == 'gestor' %}
+        <div class="sps-card" style="border-color: var(--sps-danger);">
+            <h3>Estornar Comanda Paga (Exclusivo do Gestor)</h3>
+            <p class="helptext" style="margin-bottom: 0.75rem;">
+                Reverte atomicamente o saldo no caixa, estorna as comissões geradas, devolve os produtos vendidos ao estoque e cancela o registro fiscal preparatório.
+            </p>
+            <form method="post" action="{% url 'finance:order_reverse' order.pk %}" novalidate>
+                {% csrf_token %}
+                {{ reversal_form.as_p }}
+                <button type="submit" class="btn-danger">Confirmar Estorno da Comanda</button>
+            </form>
         </div>
     {% endif %}
 

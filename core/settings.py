@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     'clients.apps.ClientsConfig',
     'inventory.apps.InventoryConfig',
     'orders.apps.OrdersConfig',
+    'finance.apps.FinanceConfig',
+    'fiscal.apps.FiscalConfig',
 ]
 
 MIDDLEWARE = [

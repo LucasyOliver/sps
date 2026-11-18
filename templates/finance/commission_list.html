@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Extrato de Comissões — SPS{% endblock %}
+
+{% block content %}
+<section>
+    <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
+        <h2 style="margin: 0;">Extrato e Repasse de Comissões — {{ request.salon.trade_name }}</h2>
+        {% if user.role != 'profissional' %}
+            <a href="{% url 'finance:cash_dashboard' %}" class="btn-secondary">Voltar ao Caixa</a>
+        {% endif %}
+    </div>
+
+    <div class="sps-grid-kpi" style="margin-top: 1.25rem;">
+        <div class="sps-kpi-card">
+            <div class="sps-kpi-label">Pendente de Repasse</div>
+            <div class="sps-kpi-value" style="color: var(--sps-primary);">R$ {{ total_pending }}</div>
+        </div>
+        <div class="sps-kpi-card">
+            <div class="sps-kpi-label">Pago aos Profissionais</div>
+            <div class="sps-kpi-value">R$ {{ total_paid }}</div>
+        </div>
+    </div>
+
+    <form method="get" style="display: flex; gap: 0.75rem; align-items: flex-end; flex-wrap: wrap; margin: 1rem 0;">
+        {% if user.role != 'profissional' %}
+            <div style="min-width: 220px;">
+                <label for="professional">Profissional</label>
+                <select id="professional" name="professional">
+                    <option value="">Todos</option>
+                    {% for prof in professionals %}
+                        <option value="{{ prof.pk }}" {% if selected_professional == prof.pk|stringformat:"s" %}selected{% endif %}>
+                            {{ prof.full_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        {% endif %}
+        <div style="min-width: 200px;">
+            <label for="status">Status</label>
+            <select id="status" name="status">
+                <option value="">Todos</option>
+                {% for value, label in status_choices %}
+                    <option value="{{ value }}" {% if selected_status == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn-secondary">Filtrar</button>
+    </form>
+
+    <form method="post" action="{% url 'finance:commission_payout' %}">
+        {% csrf_token %}
+        <div class="sps-table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        {% if user.role == 'gestor' %}<th>Baixar</th>{% endif %}
+                        <th>Data</th>
+                        <th>Profissional</th>
+                        <th>Comanda</th>
+                        <th>Serviço</th>
+                        <th>Valor Base</th>
+                        <th>% Aplicado</th>
+                        <th>Valor Comissão</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for comm in commissions %}
+                        <tr>
+                            {% if user.role == 'gestor' %}
+                                <td>
+                                    {% if comm.status == 'pendente_repasse' %}
+                                        <input type="checkbox" name="entry_ids" value="{{ comm.pk }}" style="width: auto;">
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+                            {% endif %}
+                            <td>{{ comm.created_at|date:'d/m/Y H:i' }}</td>
+                            <td><strong>{{ comm.professional.full_name }}</strong></td>
+                            <td>
+                                {% if user.role != 'profissional' %}
+                                    <a href="{% url 'orders:order_detail' comm.order_id %}">#{{ comm.order_id }}</a>
+                                {% else %}
+                                    #{{ comm.order_id }}
+                                {% endif %}
+                            </td>
+                            <td>{{ comm.order_service_item.service.name }}</td>
+                            <td>R$ {{ comm.base_amount }}</td>
+                            <td>{{ comm.commission_pct }}%</td>
+                            <td><strong>R$ {{ comm.commission_amount }}</strong></td>
+                            <td>
+                                <span class="sps-badge {% if comm.status == 'pago_ao_profissional' %}sps-badge-success{% elif comm.status == 'pendente_repasse' %}sps-badge-warning{% else %}sps-badge-danger{% endif %}">
+                                    {{ comm.get_status_display }}
+                                </span>
+                                {% if comm.paid_at %}<div class="helptext">em {{ comm.paid_at|date:'d/m/Y H:i' }}</div>{% endif %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="9">Nenhum lançamento de comissão encontrado.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if user.role == 'gestor' %}
+            <button type="submit" class="btn-primary">Confirmar Pagamento (Baixa) das Comissões Selecionadas</button>
+        {% endif %}
+    </form>
+</section>
+{% endblock %}

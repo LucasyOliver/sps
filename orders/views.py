@@ -5,6 +5,8 @@ from django.urls import reverse
 from django.views import View
 from django.views.generic import DetailView, FormView, ListView
 from base.mixins import RecepcaoOrGestorMixin
+from finance.forms import OrderCheckoutForm, OrderReversalForm
+from finance.services import CashRegisterService
 from orders.forms import (
     OrderAdjustmentForm,
     OrderCancelForm,
@@ -118,6 +120,16 @@ class ServiceOrderDetailView(RecepcaoOrGestorMixin, DetailView):
             }
         )
         context['cancel_form'] = OrderCancelForm()
+        context['open_cash_session'] = CashRegisterService.get_open_session(salon)
+        context['checkout_form'] = OrderCheckoutForm(
+            initial={'amount_1': self.object.total_amount}
+        )
+        context['reversal_form'] = OrderReversalForm()
+        context['order_payments'] = self.object.payments.select_related('cash_session')
+        context['commission_entries'] = self.object.commission_entries.select_related(
+            'professional', 'order_service_item__service'
+        )
+        context['fiscal_record'] = getattr(self.object, 'fiscal_record', None)
         return context
 
 

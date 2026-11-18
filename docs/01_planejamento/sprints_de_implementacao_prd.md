@@ -109,16 +109,16 @@ modulo_pai: "prd_do_projeto.md"
 
 ## Sprint 07: Caixa Diário, Comissões no Pagamento e Preparação Fiscal (`RF-013`)
 
-- **Solicitação do usuário:** `pendente`
+- **Solicitação do usuário:** `solicitada e concluída em 2026-11-18`
 - **Requisitos atendidos:** `RF-009`, `RF-013`, `RNF-001`, `RNF-002`
 - **Pré-condições:** `Sprint 06` concluída.
 - **Tarefas da Sprint:**
-  - [ ] `S07-T01`: Criar app `finance` com `CashRegisterSession` (abertura/fechamento de caixa), `CashTransaction` (entradas e despesas), `OrderPayment` (múltiplos meios de pagamento) e `CommissionEntry`.
-  - [ ] `S07-T02`: Criar app `fiscal` com `FiscalDocumentRecord` (snapshots de emitente, tomador, payload fiscal de serviços/Salão-Parceiro para NFS-e e payload de produtos para NFC-e) e interface `FiscalGatewayAdapter` (*NoOp/Stub* documentado para futura integração — `DEC-003`).
-  - [ ] `S07-T03`: Implementar `OrderCheckoutService.close_and_pay_order()` em transação atômica única: valida caixa aberto, valida e baixa estoque dos produtos vendidos (abortando se saldo for insuficiente), registra pagamentos no caixa, gera `CommissionEntry` para cada serviço pago e cria `FiscalDocumentRecord`.
-  - [ ] `S07-T04`: Implementar fluxo de estorno de comanda paga (exclusivo do `gestor`) revertendo atomicamente caixa, comissões, saldo de estoque e status do registro fiscal, além de tela de extrato e baixa de repasse de comissões aos profissionais.
-  - [ ] `S07-T05`: Escrever e executar testes automatizados (`DEC-001`) provando que comissões **não** nascem antes do pagamento, que o pagamento gera comissão com o percentual correto, que falta de estoque aborta o fechamento e que o `FiscalDocumentRecord` é populado.
-  - [ ] `S07-T06`: Revisar incremento, registrar `evidencias_da_sprint_007.md` e entregar para ação de Git/GitHub do usuário.
+  - [x] `S07-T01`: Criar app `finance` com `CashRegisterSession` (abertura/fechamento de caixa), `CashTransaction` (entradas e despesas), `OrderPayment` (múltiplos meios de pagamento) e `CommissionEntry`.
+  - [x] `S07-T02`: Criar app `fiscal` com `FiscalDocumentRecord` (snapshots de emitente, tomador, payload fiscal de serviços/Salão-Parceiro para NFS-e e payload de produtos para NFC-e) e interface `FiscalGatewayAdapter` (*NoOp/Stub* documentado para futura integração — `DEC-003`).
+  - [x] `S07-T03`: Implementar `OrderCheckoutService.close_and_pay_order()` em transação atômica única: valida caixa aberto, valida e baixa estoque dos produtos vendidos (abortando se saldo for insuficiente), registra pagamentos no caixa, gera `CommissionEntry` para cada serviço pago e cria `FiscalDocumentRecord`.
+  - [x] `S07-T04`: Implementar fluxo de estorno de comanda paga (exclusivo do `gestor`) revertendo atomicamente caixa, comissões, saldo de estoque e status do registro fiscal, além de tela de extrato e baixa de repasse de comissões aos profissionais.
+  - [x] `S07-T05`: Escrever e executar testes automatizados (`DEC-001`) provando que comissões **não** nascem antes do pagamento, que o pagamento gera comissão com o percentual correto, que falta de estoque aborta o fechamento e que o `FiscalDocumentRecord` é populado.
+  - [x] `S07-T06`: Revisar incremento, registrar `evidencias_da_sprint_007.md` e entregar para ação de Git/GitHub do usuário.
 
 ---
 

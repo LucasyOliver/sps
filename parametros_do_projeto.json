@@ -9,7 +9,7 @@
     "dominio_principal": null,
     "endereco_swarm": null,
     "especificacoes_tecnicas_confirmadas": "Ver docs/01_planejamento/prompt_refinado_do_projeto.md (secao <tech_specs>)",
-    "id_sprint": "Sprint 06",
+    "id_sprint": "Sprint 07",
     "modelo_llm": null,
     "modelo_tenant": "Multi-tenant compartilhado com isolamento por organizacao (Salao). Cada usuario interno pertence a um unico salao fixo (alem do Superadmin SaaS global); clientes, servicos, agenda, comandas, caixa, comissoes e estoque sao estritamente isolados por salao.",
     "nome_organizacao": "salao",
@@ -44,7 +44,7 @@
     "prompt_refinado_revisado": true,
     "prd_aprovado": true,
     "evidencia_aprovacao_prd": "Aprovado pelo desenvolvedor em 2026-11-12: 'Aprovo o PRD versao 1.0.0 do SPS e solicito a execucao exclusiva da Sprint 01.'",
-    "sprint_solicitada": "Sprint 06",
+    "sprint_solicitada": "Sprint 07",
     "git_github_exclusivos_do_usuario": true,
     "deploy_executado": false
   }

@@ -14,6 +14,7 @@ urlpatterns = [
     path('clientes/', include('clients.urls', namespace='clients')),
     path('estoque/', include('inventory.urls', namespace='inventory')),
     path('comandas/', include('orders.urls', namespace='orders')),
+    path('caixa/', include('finance.urls', namespace='finance')),
     path('s/<slug:salon_slug>/', include('scheduling.public_urls', namespace='public_booking')),
     path('', include('base.urls', namespace='base')),
 ]
