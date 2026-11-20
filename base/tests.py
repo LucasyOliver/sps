@@ -24,13 +24,25 @@ class HealthcheckAndWaitForDbTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), {'status': 'ready', 'database': 'ok'})
 
-    @override_settings(DEBUG=False, SECURE_SSL_REDIRECT=True)
+    # override_settings não reexecuta o bloco `if not DEBUG` de core.settings.
+    @override_settings(
+        DEBUG=False,
+        SECURE_SSL_REDIRECT=True,
+        SECURE_PROXY_SSL_HEADER=('HTTP_X_FORWARDED_PROTO', 'https'),
+        SECURE_REDIRECT_EXEMPT=[r'^healthz/$', r'^readyz/$'],
+    )
     def test_proxy_ssl_header_and_healthcheck_redirect_exemption(self):
-        health_resp = self.client.get(reverse('base:healthz'))
-        self.assertEqual(health_resp.status_code, 200)
+        for route in ('base:healthz', 'base:readyz'):
+            with self.subTest(route=route):
+                health_resp = self.client.get(reverse(route))
+                self.assertEqual(health_resp.status_code, 200)
 
         http_resp = self.client.get(reverse('accounts:login'))
         self.assertEqual(http_resp.status_code, 301)
+        self.assertEqual(
+            http_resp['Location'],
+            f"https://testserver{reverse('accounts:login')}",
+        )
 
         https_proxied_resp = self.client.get(
             reverse('accounts:login'),
